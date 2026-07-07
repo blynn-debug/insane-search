@@ -1,0 +1,1083 @@
+Request URL
+https://www.bdsplanet.com/eais/getNsdiLandInfo.ytp?pnu_key=7xOonrT4KyF
+Request Method
+GET
+Status Code
+200 OK
+Remote Address
+110.10.147.113:443
+Referrer Policy
+strict-origin-when-cross-origin
+connection
+Keep-Alive
+content-encoding
+gzip
+content-type
+application/json;charset=utf8
+date
+Wed, 01 Jul 2026 04:39:23 GMT
+keep-alive
+timeout=5, max=99
+server
+Apache
+set-cookie
+isToken=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Domain=bdsplanet.com; Path=/;SameSite=None;Secure;
+set-cookie
+nonMember=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Domain=bdsplanet.com; Path=/;SameSite=None;Secure;
+strict-transport-security
+max-age=31536000 ; includeSubDomains
+transfer-encoding
+chunked
+vary
+accept-encoding
+x-content-type-options
+nosniff
+x-xss-protection
+1; mode=block
+accept
+*/*
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,ja-JP;q=0.6,ja;q=0.5
+cache-control
+no-cache
+connection
+keep-alive
+cookie
+_fbp=fb.1.1778050517332.68270873857863641; _gcl_au=1.1.156145923.1778050517; ckSsPpPopup=true; lastLoggedInSNS_b=kakao; _ga_W0HCMCWKMZ=GS2.1.s1781750261$o3$g1$t1781750272$j49$l0$h0; bdsp_usid=YTZhZjg1MmYtNWY4ZS00YmJkLWFhZGEtM2VkMDFkMzY3MDk4; mp_YOUR_API_KEY_mixpanel=%7B%22distinct_id%22%3A%22%24device%3A44f6d9d3-5f9c-4972-a21c-dc86d6db1179%22%2C%22%24device_id%22%3A%2244f6d9d3-5f9c-4972-a21c-dc86d6db1179%22%2C%22%24search_engine%22%3A%22google%22%2C%22%24initial_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%22www.google.com%22%2C%22__mps%22%3A%7B%7D%2C%22__mpso%22%3A%7B%22%24initial_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%22www.google.com%22%7D%2C%22__mpus%22%3A%7B%7D%2C%22__mpa%22%3A%7B%7D%2C%22__mpu%22%3A%7B%7D%2C%22__mpr%22%3A%5B%5D%2C%22__mpap%22%3A%5B%5D%7D; _ga=GA1.2.913664368.1778050517; _gid=GA1.2.140546054.1782880769; _gat_UA-72361022-1=1; adPopHideUntil=2026-07-01; _ga_ZMYFVJ62R4=GS2.1.s1782880766$o13$g1$t1782880795$j31$l0$h0
+host
+www.bdsplanet.com
+pragma
+no-cache
+referer
+https://www.bdsplanet.com/map/realprice_map/7xOonrT4KyF/N/H/1/9584.06.ytp
+sec-ch-ua
+"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-origin
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+
+## PAYLOAD
+pnu_key=7xOonrT4KyF
+
+
+{
+  "LADFRTLSC" : "00",
+  "MOD_DATE" : null,
+  "MNNMSLNO" : "708-3",
+  "POSESNSECODE" : "06",
+  "JIBUN_FULL_ADDR" : "제주시,노형동 708-3",
+  "LNDPCLAR" : "1298.90000",
+  "REG_DATE" : null,
+  "LDCODENM" : "제주특별자치도 제주시 노형동",
+  "LDCODE" : "5011012200",
+  "POSESNSECODENM" : "법인",
+  "LNDCGRCODENM" : "주차장",
+  "PBLNTFPCLND" : 3164000,
+  "CAL_PBLNTFPCLND" : 4109700000,
+  "SINO" : null,
+  "REGSTRSECODENM" : "토지대장",
+  "LADFRTLSCNM" : "수치",
+  "REGSTRSECODE" : "1",
+  "PNU" : "5011012200107080003",
+  "LDCODENM_SHORT" : "노형동",
+  "JIBUN_DONG_ADDR" : "제주시,노형동",
+  "LNDCGRCODE" : "11",
+  "CNRSPSNCO" : "0",
+  "LASTUPDTDT" : "2026-05-04",
+  "LAND_GB" : ""
+}
+
+
+---
+
+Request URL
+https://www.bdsplanet.com/sales/detail/realprice/assumePrice.ytp
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+110.10.147.113:443
+Referrer Policy
+strict-origin-when-cross-origin
+connection
+Keep-Alive
+content-encoding
+gzip
+content-type
+application/json
+date
+Wed, 01 Jul 2026 04:41:59 GMT
+keep-alive
+timeout=5, max=93
+server
+Apache
+set-cookie
+isToken=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Domain=bdsplanet.com; Path=/;SameSite=None;Secure;
+set-cookie
+nonMember=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Domain=bdsplanet.com; Path=/;SameSite=None;Secure;
+strict-transport-security
+max-age=31536000 ; includeSubDomains
+transfer-encoding
+chunked
+vary
+accept-encoding
+x-content-type-options
+nosniff
+x-xss-protection
+1; mode=block
+accept
+*/*
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,ja-JP;q=0.6,ja;q=0.5
+cache-control
+no-cache
+connection
+keep-alive
+content-length
+281
+content-type
+application/json; charset=UTF-8
+cookie
+_fbp=fb.1.1778050517332.68270873857863641; _gcl_au=1.1.156145923.1778050517; ckSsPpPopup=true; lastLoggedInSNS_b=kakao; _ga_W0HCMCWKMZ=GS2.1.s1781750261$o3$g1$t1781750272$j49$l0$h0; bdsp_usid=YTZhZjg1MmYtNWY4ZS00YmJkLWFhZGEtM2VkMDFkMzY3MDk4; mp_YOUR_API_KEY_mixpanel=%7B%22distinct_id%22%3A%22%24device%3A44f6d9d3-5f9c-4972-a21c-dc86d6db1179%22%2C%22%24device_id%22%3A%2244f6d9d3-5f9c-4972-a21c-dc86d6db1179%22%2C%22%24search_engine%22%3A%22google%22%2C%22%24initial_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%22www.google.com%22%2C%22__mps%22%3A%7B%7D%2C%22__mpso%22%3A%7B%22%24initial_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%22www.google.com%22%7D%2C%22__mpus%22%3A%7B%7D%2C%22__mpa%22%3A%7B%7D%2C%22__mpu%22%3A%7B%7D%2C%22__mpr%22%3A%5B%5D%2C%22__mpap%22%3A%5B%5D%7D; _gid=GA1.2.140546054.1782880769; adPopHideUntil=2026-07-01; _gat_UA-72361022-1=1; _ga=GA1.1.913664368.1778050517; _ga_ZMYFVJ62R4=GS2.1.s1782880766$o13$g1$t1782880956$j60$l0$h0
+host
+www.bdsplanet.com
+origin
+https://www.bdsplanet.com
+pragma
+no-cache
+referer
+https://www.bdsplanet.com/map/realprice_map/7xOonrT4KyF/N/H/1/9584.06.ytp
+sec-ch-ua
+"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-origin
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+
+
+
+## payload
+{"ms_pnu_key":"7xOonrT4KyF","bldg_area_m2":9584.06,"detail_realprice_check":"true","lng":126.48256716306263,"regstr_gb_cd":"1","t_type":"1","t_no":"CS9000157752","pnu_key":"7xOonrT4KyF","r_type":"H","lat":33.48241749398507,"status":"N","configProcess":"m1mix","configVersion":"v3"}
+
+## response
+
+{
+  "summary" : {
+    "build_price" : 5.111228078E9,
+    "land_price_unit_m2" : 8194552.000153976,
+    "build_price_unit_py" : 1762997.0225961222,
+    "land_area_py" : 392.92,
+    "land_price" : 1.0643903593E10,
+    "build_area_py" : 2899.17,
+    "build_price_unit_m2" : 533305.1001350159,
+    "land_area_m2" : 1298.9,
+    "build_area_m2" : 9584.06,
+    "land_cnt" : 1,
+    "build_cnt" : 1,
+    "land_price_unit_py" : 2.7089238504021175E7
+  },
+  "landData" : [ {
+    "rinm" : null,
+    "lndpclar_m2" : 1298.90000,
+    "assume_price_land_unit_py" : null,
+    "dongnm" : "노형동",
+    "lndpclar_py" : 392.92,
+    "jibun" : "708-3",
+    "assume_price_land_unit_m2" : null,
+    "land_gb" : "",
+    "b_type_t" : "대표지번"
+  } ],
+  "real_price_data_date_yymmdd" : "26.05.29",
+  "buildData" : [ {
+    "bunji" : "708-3",
+    "rinm" : null,
+    "assume_price_build_unit_py" : 1763000.0,
+    "dongnm" : "노형동",
+    "total_floor_area_py" : 2899.17,
+    "assume_price_build_unit_m2" : 533305.0,
+    "building_nm" : null,
+    "total_floor_area_m2" : 9584.06
+  } ]
+}
+
+
+---Request URL
+https://www.bdsplanet.com/member/login.ytp?login_kind=W&reload_yn=N&r_url=
+Request Method
+GET
+Status Code
+200 OK
+Remote Address
+110.10.147.113:443
+Referrer Policy
+strict-origin-when-cross-origin
+connection
+Keep-Alive
+content-encoding
+gzip
+content-language
+ko-KR
+content-type
+text/html;charset=utf-8
+date
+Wed, 01 Jul 2026 04:41:53 GMT
+keep-alive
+timeout=5, max=99
+server
+Apache
+set-cookie
+isToken=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Domain=bdsplanet.com; Path=/;SameSite=None;Secure;
+set-cookie
+nonMember=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Domain=bdsplanet.com; Path=/;SameSite=None;Secure;
+strict-transport-security
+max-age=31536000 ; includeSubDomains
+transfer-encoding
+chunked
+vary
+accept-encoding
+x-content-type-options
+nosniff
+x-xss-protection
+1; mode=block
+accept
+*/*
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,ja-JP;q=0.6,ja;q=0.5
+cache-control
+no-cache
+connection
+keep-alive
+cookie
+_fbp=fb.1.1778050517332.68270873857863641; _gcl_au=1.1.156145923.1778050517; ckSsPpPopup=true; lastLoggedInSNS_b=kakao; _ga_W0HCMCWKMZ=GS2.1.s1781750261$o3$g1$t1781750272$j49$l0$h0; bdsp_usid=YTZhZjg1MmYtNWY4ZS00YmJkLWFhZGEtM2VkMDFkMzY3MDk4; mp_YOUR_API_KEY_mixpanel=%7B%22distinct_id%22%3A%22%24device%3A44f6d9d3-5f9c-4972-a21c-dc86d6db1179%22%2C%22%24device_id%22%3A%2244f6d9d3-5f9c-4972-a21c-dc86d6db1179%22%2C%22%24search_engine%22%3A%22google%22%2C%22%24initial_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%22www.google.com%22%2C%22__mps%22%3A%7B%7D%2C%22__mpso%22%3A%7B%22%24initial_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%22www.google.com%22%7D%2C%22__mpus%22%3A%7B%7D%2C%22__mpa%22%3A%7B%7D%2C%22__mpu%22%3A%7B%7D%2C%22__mpr%22%3A%5B%5D%2C%22__mpap%22%3A%5B%5D%7D; _ga=GA1.2.913664368.1778050517; _gid=GA1.2.140546054.1782880769; adPopHideUntil=2026-07-01; _ga_ZMYFVJ62R4=GS2.1.s1782880766$o13$g1$t1782880800$j26$l0$h0; _gat_UA-72361022-1=1
+host
+www.bdsplanet.com
+pragma
+no-cache
+referer
+https://www.bdsplanet.com/map/realprice_map/7xOonrT4KyF/N/H/1/9584.06.ytp
+sec-ch-ua
+"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-origin
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+x-requested-with
+XMLHttpRequest
+
+login_kind=W&reload_yn=N&r_url=
+
+
+
+
+	<div class="pop_wrap t23vaWrh18bba">
+		<div class="pop_header t23vaWrh18bba__jjrqf">
+			<div class="dc">
+                <div class="t23vaWrh18bba__vkw23586">
+				    <img src="/images/logo_new_20250206.png" alt="부동산플래닛" />
+                </div>
+			</div>
+		</div>
+		<div class="pop_container t23vaWrh18bbabnPew">
+			<div class="pop_content t23vaWrh18bba__gdsg236">
+				<div class="sc t23vaWrh18bbahjSt">
+                    <div class="t23vaWrh18bba__f234v6">
+                        <div class="t23vaWrh18bbahdvasd">
+                            <div class="t23vaWrh18bbayweghd">
+                                <label for="dEmail">
+                                    <span class="t23vaWrh18bbajutwr">이메일</span>
+                                </label>
+                            </div>
+                            <div class="diph243vbb">
+                                <input id="dEmail" type="email" name="email" placeholder="이메일을 입력해 주세요." data-loginType="email">
+                            </div>
+                            <p class="diph243vbbAl rt" data-loginAlertType="email"></p>
+                        </div>
+                        <div class="t23vaWrh18bbahdvasd">
+                            <div class="t23vaWrh18bbayweghd">
+                                <label for="dPassword">
+                                    <span class="t23vaWrh18bbajutwr">비밀번호</span>
+                                </label>
+                            </div>
+                            <div class="diph243vbb">
+                                <input type="password" name="pwd" placeholder="비밀번호를 입력해 주세요."  data-loginType="password">
+                                <div class="diph243vbbUt">
+                                    <a href="javascript:void(0)" class="diph243vbbSe shT hide">
+                                        <svg
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                class="sh"
+                                                d="M15.4779 17.5834L13.2904 15.4167C12.7626 15.5834 12.2244 15.7223 11.6758 15.8334C11.1272 15.9445 10.5681 16.0001 9.9987 16.0001C8.17925 16.0001 6.50911 15.5209 4.98828 14.5626C3.46745 13.6042 2.26953 12.3265 1.39453 10.7292C1.32509 10.6181 1.27648 10.5001 1.2487 10.3751C1.22092 10.2501 1.20703 10.1251 1.20703 10.0001C1.20703 9.87508 1.22439 9.75008 1.25911 9.62508C1.29384 9.50008 1.34592 9.38203 1.41536 9.27092C1.76259 8.67369 2.14106 8.10078 2.55078 7.55217C2.9605 7.00355 3.42925 6.50703 3.95703 6.06258L2.39453 4.50008C2.24175 4.3473 2.16536 4.17369 2.16536 3.97925C2.16536 3.7848 2.24175 3.61119 2.39453 3.45841C2.54731 3.30564 2.72439 3.22925 2.92578 3.22925C3.12717 3.22925 3.30425 3.30564 3.45703 3.45841L16.5404 16.5417C16.6931 16.6945 16.7695 16.8681 16.7695 17.0626C16.7695 17.257 16.6931 17.4306 16.5404 17.5834C16.3876 17.7362 16.2105 17.8126 16.0091 17.8126C15.8077 17.8126 15.6306 17.7362 15.4779 17.5834ZM9.9987 13.5001C10.1931 13.5001 10.3876 13.4792 10.582 13.4376C10.7765 13.3959 10.9709 13.3473 11.1654 13.2917L6.70703 8.83342C6.66536 9.02786 6.62023 9.2223 6.57161 9.41675C6.523 9.61119 6.4987 9.80564 6.4987 10.0001C6.4987 10.9723 6.83898 11.7987 7.51953 12.4792C8.20009 13.1598 9.02648 13.5001 9.9987 13.5001ZM9.9987 4.00008C11.8181 4.00008 13.4918 4.47925 15.0195 5.43758C16.5473 6.39591 17.7487 7.68064 18.6237 9.29175C18.6931 9.40286 18.7418 9.51744 18.7695 9.6355C18.7973 9.75355 18.8112 9.87508 18.8112 10.0001C18.8112 10.1251 18.7938 10.2466 18.7591 10.3647C18.7244 10.4827 18.6793 10.5973 18.6237 10.7084C18.3598 11.1945 18.0681 11.6598 17.7487 12.1042C17.4293 12.5487 17.0681 12.9654 16.6654 13.3542C16.4987 13.5209 16.2973 13.6008 16.0612 13.5938C15.8251 13.5869 15.6237 13.5001 15.457 13.3334L13.5612 11.4376C13.4779 11.3542 13.4223 11.2501 13.3945 11.1251C13.3668 11.0001 13.3668 10.882 13.3945 10.7709C13.4223 10.6459 13.4466 10.5174 13.4674 10.3855C13.4883 10.2536 13.4987 10.1251 13.4987 10.0001C13.4987 9.02786 13.1584 8.20147 12.4779 7.52092C11.7973 6.84036 10.9709 6.50008 9.9987 6.50008C9.85981 6.50008 9.72787 6.5105 9.60287 6.53133C9.47787 6.55216 9.35287 6.57647 9.22787 6.60425C9.11675 6.63203 9.00217 6.63203 8.88411 6.60425C8.76606 6.57647 8.66536 6.52091 8.58203 6.43758L7.72786 5.58341C7.49175 5.3473 7.41536 5.06953 7.4987 4.75008C7.58203 4.43064 7.78342 4.23619 8.10286 4.16675C8.42231 4.0973 8.73828 4.05216 9.05078 4.03133C9.36328 4.0105 9.67925 4.00008 9.9987 4.00008ZM11.5195 8.52092C11.6306 8.63203 11.7209 8.75355 11.7904 8.8855C11.8598 9.01744 11.9084 9.1598 11.9362 9.31258C11.964 9.4098 11.9327 9.47925 11.8424 9.52092C11.7522 9.56258 11.6723 9.54869 11.6029 9.47925L10.5404 8.39592C10.4709 8.32647 10.457 8.24661 10.4987 8.15633C10.5404 8.06605 10.6098 8.02786 10.707 8.04175C10.8598 8.08341 11.0056 8.14591 11.1445 8.22925C11.2834 8.31258 11.4084 8.4098 11.5195 8.52092Z"
+                                                fill="#6F6F6F"
+                                            />
+                                            <path
+                                                class="hd"
+                                                d="M10.0013 13.5C10.9735 13.5 11.7999 13.1597 12.4805 12.4792C13.161 11.7986 13.5013 10.9722 13.5013 10C13.5013 9.02778 13.161 8.20139 12.4805 7.52083C11.7999 6.84028 10.9735 6.5 10.0013 6.5C9.02908 6.5 8.20269 6.84028 7.52214 7.52083C6.84158 8.20139 6.5013 9.02778 6.5013 10C6.5013 10.9722 6.84158 11.7986 7.52214 12.4792C8.20269 13.1597 9.02908 13.5 10.0013 13.5ZM10.0013 12C9.44575 12 8.97352 11.8056 8.58464 11.4167C8.19575 11.0278 8.0013 10.5556 8.0013 10C8.0013 9.44444 8.19575 8.97222 8.58464 8.58333C8.97352 8.19444 9.44575 8 10.0013 8C10.5569 8 11.0291 8.19444 11.418 8.58333C11.8069 8.97222 12.0013 9.44444 12.0013 10C12.0013 10.5556 11.8069 11.0278 11.418 11.4167C11.0291 11.8056 10.5569 12 10.0013 12ZM10.0013 16C8.19575 16 6.53602 15.5174 5.02214 14.5521C3.50825 13.5868 2.30686 12.3125 1.41797 10.7292C1.34852 10.6181 1.29991 10.5016 1.27214 10.3798C1.24436 10.258 1.23047 10.133 1.23047 10.0048C1.23047 9.8766 1.24436 9.75 1.27214 9.625C1.29991 9.5 1.34852 9.38194 1.41797 9.27083C2.30686 7.6875 3.50825 6.41319 5.02214 5.44792C6.53602 4.48264 8.19575 4 10.0013 4C11.8069 4 13.4666 4.48264 14.9805 5.44792C16.4944 6.41319 17.6957 7.6875 18.5846 9.27083C18.6541 9.38194 18.7027 9.4984 18.7305 9.62021C18.7582 9.74201 18.7721 9.86701 18.7721 9.99521C18.7721 10.1234 18.7582 10.25 18.7305 10.375C18.7027 10.5 18.6541 10.6181 18.5846 10.7292C17.6957 12.3125 16.4944 13.5868 14.9805 14.5521C13.4666 15.5174 11.8069 16 10.0013 16Z"
+                                                fill="#6F6F6F"
+                                            />
+                                        </svg>
+                                    </a>
+                                </div>
+                                <p class="diph243vbbAl rt" data-loginAlertType="password"></p>
+                            </div>
+                        </div>
+                        <div class="t23vaWrh18bbasYgxc">
+                            <div class="dichk8Vvsa" style="display:none">
+                                <input type="checkbox" id="autologin" name="auto_login">
+                                <label for="autologin"><span class="txt">자동 로그인</span></label>
+                            </div>
+                            <div class="dichk8Vvsa">
+                                <input type="checkbox" id="autolog01" name="auth_login">
+                                <label for="autolog01"><span class="txt">이메일 저장</span></label>
+                            </div>
+                        </div>
+                        <div class="t23vaWrh18bbaheqWq">
+                            <a href="javascript:void(0);" onclick="javascript:goLogin('E');" class="btns t23vaWrh18bbabduwz" style="width: 100%"><span>로그인</span></a>
+                        </div>
+                        <div class="t23vaWrh18bbawQWVx">
+                            <a href="javascript:;" onclick="javascript:goFindEmailPwd();" class="t23vaWrh18bbaPvqaz">이메일 · 비밀번호 찾기</a>
+                        </div>
+
+
+                        <div class="t23vaWrh18bbatrs">
+                            <div class="t23vaWrh18bbahet">
+                                <a href="javascript:void(0)" onclick="javascript:goLogin('N');" class="t23vaWrh18bba7izAw" data-sns="naver">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M14.8562 12.56L8.91901 4H4V20H9.15702V11.44L15.081 20H20V4H14.8562V12.56Z"
+                                            fill="white"
+                                        />
+                                    </svg>
+                                </a>
+                            </div>
+                            <div class="t23vaWrh18bbahet">
+                                <a href="javascript:void(0);" onclick="javascript:goLogin('K');" class="t23vaWrh18bba7izAw" data-sns="kakao">
+                                    <svg width="23" height="23" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fillrule="evenodd" cliprule="evenodd" d="M14.0031 2.99878C7.92692 2.99878 3 7.07809 3 12.1023C3 15.2302 4.9072 17.9867 7.80467 19.6288L6.58211 24.4054C6.47208 24.8289 6.92442 25.1613 7.27285 24.9202L12.6216 21.1341C13.0739 21.1797 13.5324 21.2058 13.9969 21.2058C20.0731 21.2058 25 17.1265 25 12.1023C25 7.07809 20.0792 2.99878 14.0031 2.99878Z" fill="black"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                            <div class="t23vaWrh18bbahet">
+                                <a href="javascript:void(0);" onclick="javascript:goLogin('F');" class="t23vaWrh18bba7izAw" data-sns="facebook">
+                                    <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+                                        <path
+                                            d="M16.9309 13.1669L17.4829 9.57457H14.0374V7.24333C14.0374 6.25955 14.5188 5.30194 16.0624 5.30194H17.6294V2.24333C17.6294 2.24333 16.2062 2 14.8485 2C12.0099 2 10.1551 3.72161 10.1551 6.83516V9.57195H7V13.1643H10.1551V21.8482C10.7882 21.9477 11.437 22 12.0963 22C12.7555 22 13.4043 21.9477 14.0374 21.8482V13.1643H16.9335L16.9309 13.1669Z"
+                                            fill="white"
+                                        />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <a href="https://property.bdsplanet.com/auth/join" class="t23vaWrh18bbaYczc">
+                        <div class="t23vaWrh18bbaloW">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M7.55818 11.9105C7.25082 11.9105 6.99443 11.8078 6.78901 11.6024C6.58373 11.3971 6.48109 11.1408 6.48109 10.8334C6.48109 10.5261 6.58373 10.2698 6.78901 10.0645C6.99443 9.85907 7.25082 9.75636 7.55818 9.75636C7.86554 9.75636 8.12186 9.85907 8.32714 10.0645C8.53241 10.2698 8.63505 10.5261 8.63505 10.8334C8.63505 11.1408 8.53241 11.3971 8.32714 11.6024C8.12186 11.8078 7.86554 11.9105 7.55818 11.9105ZM12.4403 11.9105C12.1329 11.9105 11.8766 11.8078 11.6713 11.6024C11.466 11.3971 11.3634 11.1408 11.3634 10.8334C11.3634 10.5261 11.466 10.2698 11.6713 10.0645C11.8766 9.85907 12.1329 9.75636 12.4403 9.75636C12.7476 9.75636 13.004 9.85907 13.2094 10.0645C13.4147 10.2698 13.5173 10.5261 13.5173 10.8334C13.5173 11.1408 13.4147 11.3971 13.2094 11.6024C13.004 11.8078 12.7476 11.9105 12.4403 11.9105ZM9.99922 16.5255C11.8132 16.5255 13.3563 15.8957 14.6284 14.6359C15.9003 13.3762 16.5363 11.8388 16.5363 10.0236C16.5363 9.69032 16.5155 9.37316 16.4738 9.07219C16.4321 8.77136 16.3557 8.4792 16.2446 8.19573C15.953 8.26518 15.6672 8.31726 15.3873 8.35198C15.1075 8.3867 14.8078 8.40407 14.4884 8.40407C13.248 8.40407 12.079 8.13913 10.9815 7.60927C9.88401 7.07941 8.94339 6.33622 8.15964 5.37969C7.73089 6.43163 7.11116 7.34705 6.30047 8.12594C5.48977 8.90497 4.55151 9.49587 3.48568 9.89865V10.0236C3.48568 11.8388 4.11776 13.3762 5.38193 14.6359C6.64609 15.8957 8.18519 16.5255 9.99922 16.5255ZM10.0111 18.7339C8.80415 18.7339 7.66998 18.5053 6.60859 18.0482C5.5472 17.591 4.62186 16.9678 3.83255 16.1786C3.04325 15.3893 2.42005 14.4639 1.96297 13.4022C1.50589 12.3405 1.27734 11.2061 1.27734 9.99907C1.27734 8.79198 1.50589 7.65795 1.96297 6.59698C2.42005 5.53601 3.04325 4.61087 3.83255 3.82156C4.62186 3.0324 5.54727 2.4092 6.6088 1.95198C7.67047 1.4949 8.80484 1.26636 10.0119 1.26636C11.219 1.26636 12.3511 1.4949 13.4082 1.95198C14.4653 2.4092 15.3885 3.0324 16.1778 3.82156C16.9669 4.61087 17.5901 5.53636 18.0473 6.59802C18.5044 7.65969 18.733 8.79406 18.733 10.0011C18.733 11.2082 18.5044 12.3423 18.0473 13.4032C17.5901 14.4642 16.9669 15.3893 16.1778 16.1786C15.3885 16.9678 14.4644 17.591 13.4055 18.0482C12.3464 18.5053 11.215 18.7339 10.0111 18.7339ZM8.87422 3.43761C9.45755 4.40983 10.2492 5.19108 11.2492 5.78136C12.2492 6.37163 13.3603 6.66677 14.5826 6.66677C14.777 6.66677 14.9645 6.65636 15.1451 6.63552C15.3256 6.61469 15.5131 6.59038 15.7076 6.56261C15.1242 5.59038 14.3326 4.80913 13.3326 4.21886C12.3326 3.62858 11.2214 3.33344 9.99922 3.33344C9.80477 3.33344 9.61727 3.34386 9.43672 3.36469C9.25616 3.38552 9.06866 3.40983 8.87422 3.43761ZM3.68672 7.89594C4.39505 7.49316 5.01311 6.97233 5.54089 6.33344C6.06866 5.69455 6.4645 4.97927 6.72838 4.18761C6.02005 4.59038 5.402 5.11122 4.87422 5.75011C4.34644 6.389 3.95061 7.10427 3.68672 7.89594Z" style="fill:#4D5358"
+                                />
+                            </svg>
+                            <p class="t23vaWrh18bbaQy7">회원이 아니신가요?</p>
+                        </div>
+                        <div class="t23vaWrh18bbaloW">
+                            <p class="t23vaWrh18bbaHw8">회원가입하기</p>
+                        </div>
+                    </a>
+
+
+
+
+
+
+
+				</div>
+			</div>
+		</div>
+		<a href="#" class="pop_close_ax ui_pop_close">
+            <div class="ax1"></div>
+            <div class="ax2"></div>
+        </a>
+
+		<script>
+
+            const _config = {
+                loginInputs : `[data-logintype]`,
+                emailInput : `[data-logintype="email"]`,
+                emailInputAlert : `[data-loginalerttype="email"]`,
+                passwordInput : `[data-logintype="password"]`,
+                submitBtn : `.t23vaWrh18bbabduwz`,
+                pwViewBtn : `.diph243vbbSe`,
+            }
+
+			var loginParamInfo = JSON.parse('{"login_kind":"W","reload_yn":"N","r_url":""}');
+
+            const validateErrorEmp = (options) => {
+                let defaults = {
+                    inputType : '',
+                    txt : '',
+                    focus : true,
+                }
+                let ops = Object.assign(defaults, options);
+                const _input = _doc.querySelector(`[data-loginType="${ops.inputType}"]`);
+
+
+                _doc.querySelector(`[data-loginAlertType="${ops.inputType}"]`).innerHTML = ops.txt;
+                _input.classList.add('alert');
+                loginBtnSet.off();
+                if(ops.focus) _input.focus();
+            }
+
+            const validateErrorClear = (options) => {
+                let defaults = {
+                    inputType : '',
+                }
+                let ops = Object.assign(defaults, options);
+                const _input = _doc.querySelector(`[data-loginType="${ops.inputType}"]`);
+                _doc.querySelector(`[data-loginAlertType="${ops.inputType}"]`).innerHTML = '';
+                _input.classList.remove('alert');
+            }
+
+            const handlePwView = () => {
+                const _input = _doc.querySelector('[data-logintype="password"]');
+                const _btn = _doc.querySelector(_config.pwViewBtn);
+                if(_input.getAttribute('type') == 'password'){
+                    _input.setAttribute('type', 'text');
+                    _btn.classList.remove('shT');
+                    _btn.classList.add('hdT');
+                } else {
+                    _input.setAttribute('type', 'password');
+                    _btn.classList.remove('hdT');
+                    _btn.classList.add('shT');
+                }
+            }
+
+            const loginBtnSet = (() => {
+                const _btn = `.t23vaWrh18bbabduwz`;
+                const on = () => {
+                    let isSwitch = false;
+                    _doc.querySelectorAll('[data-loginType]').forEach(el => {
+                        if(el.classList.contains('alert')){
+                            isSwitch = true;
+                            return false
+                        }
+                    });
+                    if(!isSwitch){
+                        _doc.querySelector(_btn).classList.remove('disabled');
+                    }
+                }
+                const off = () => {
+                    _doc.querySelector(_btn).classList.add('disabled');
+                }
+                return {
+                    on : on,
+                    off : off
+                }
+            })();
+
+            const inputValidateRealTime = (() => {
+                const checkEmail = (input, options) => {
+                    let defaults = {
+                        focus : false
+                    }
+                    let ops = Object.assign(defaults, options);
+                    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    const emailValue = _doc.querySelector(input).value;
+
+                    // 이메일 형식이 맞지 않으면 경고 메시지 출력
+                    if (!emailPattern.test(emailValue) && !!emailValue) {
+                        validateErrorEmp({
+                            inputType : 'email',
+                            txt : '이메일을 올바르게 입력해 주세요.',
+                            focus : ops.focus
+                        });
+                    } else {
+                        validateErrorClear({
+                            inputType : 'email'
+                        });
+                    }
+                }
+                return {
+                    checkEmail : checkEmail
+                }
+            })();
+
+
+			$(function(){
+
+                const cookieValue = document.cookie
+					  .split('; ')
+					  .find(row => row.startsWith('lastLoggedInSNS_b='))
+					  ?.split('=')[1];
+
+					if (!!cookieValue) {
+					  const $snsButton = $(`.t23vaWrh18bbatrs`).find(`[data-sns="${cookieValue}"]`);
+
+					  if ($snsButton.length > 0) {
+					    // 기존 "최근에 로그인했어요" DOM 제거
+					    $snsButton.parent().find(`.t23vaWrh18bbaCh12`).remove();
+
+					    // 다시 append
+					    $snsButton.parent().append(`
+					      <div class="t23vaWrh18bbaCh12">
+					        최근에 로그인했어요
+					      </div>
+					    `);
+					  }
+				}
+
+
+				$(_config.emailInput).on('keyup', function(e) {
+                    if(!!!$(this).val() || !!!$(_config.passwordInput).val()){
+                        loginBtnSet.off();
+                    } else {
+                        loginBtnSet.on();
+                    }
+                    if(e.keyCode == 13) $(_config.passwordInput).focus();
+                    if($(this).hasClass('alert')) {
+                        if(!$(_config.emailInputAlert).text().includes('입력해 주세요')){
+                            inputValidateRealTime.checkEmail(_config.emailInput);
+                        }
+                        if(!!$(this).val()){
+                            validateErrorClear({
+                                inputType : 'email'
+                            })
+                        }
+                    }
+                    if($(_config.passwordInput).hasClass('alert')){
+                        validateErrorClear({
+                            inputType : 'password'
+                        })
+                    }
+				});
+
+                $(_config.emailInput).on('focusout', function(){
+                    if(!!$(this).val()) inputValidateRealTime.checkEmail(_config.emailInput);
+                });
+
+				$(_config.passwordInput).on('keyup', function(e) {
+                    if(!!$(this).val()){
+                        $(_config.pwViewBtn).removeClass('hide');
+                    } else {
+                        $(_config.pwViewBtn).addClass('hide');
+                    }
+                    if(!!!$(this).val() || !!!$(_config.emailInput).val()){
+                        loginBtnSet.off();
+                    } else {
+                        loginBtnSet.on();
+                    }
+					if(e.keyCode == 13 && (!!$(this).val() && !!$(_config.emailInput).val()) ) goLogin('E');
+                    if($(this).hasClass('alert')){
+                        validateErrorClear({
+                            inputType : 'password'
+                        })
+                    }
+				});
+
+                $(_config.submitBtn).on('mousedown', function(){
+                    setTimeout( () => {
+                        if(!!$(_config.emailInput).val()) inputValidateRealTime.checkEmail(_config.emailInput, {focus : true});
+                    },100)
+                });
+
+
+
+
+				if ($.cookie('saveMail_checked') == 'Y') {
+					$('#autolog01').prop('checked', true);
+					$('input[name=email]').val($.cookie('userEmail'));
+					if($('input[name=email]').val().length > 0){
+						setTimeout(function(){ $('input[name=pwd]').focus(); },100);
+					}
+				} else {
+					$('#autolog01').prop('checked', false);
+					$('input[name=email]').val('');
+					setTimeout(function(){ $('input[name=email]').focus(); },100);
+				}
+
+				//이메일저장 클릭시 쿠키에 이메일상태값 변경
+				$('#autolog01').on('click', function(){
+					var checkStatus = $(this).is(":checked");
+					//console.log(checkStatus);
+					if(checkStatus){
+						$.cookie('saveMail_checked', 'Y', {
+							path: '/',
+							domain: 'bdsplanet.com',
+						});
+
+						$.cookie('userEmail', $('input[name=email]').val(), {
+							path: '/',
+							domain: 'bdsplanet.com',
+						});
+					}else{
+						$.cookie('saveMail_checked', 'N', {
+							path: '/',
+							domain: 'bdsplanet.com',
+						});
+
+						$.cookie('userEmail', '', {
+							path: '/',
+							domain: 'bdsplanet.com',
+						});
+					}
+				});
+
+                _doc.querySelector(_config.pwViewBtn).addEventListener('click', handlePwView);
+
+                //mixpanel 로그인팝업
+                mixpanelPlanet.sendTrack('LoginPageView');
+
+                sessionStorage.setItem('lastUrlPathParam', location.pathname+location.search);
+
+                if(!!!$(_config.emailInput).val() || !!!$(_config.passwordInput).val()){
+                    loginBtnSet.off();
+                }
+
+			});
+
+			var loginPopup;
+
+			function goLogin(login_type){
+                let _config = {}
+                if(!$(_config.emailInput).hasClass('alert')){
+                    if(login_type=="E"){
+                        if($.trim($('input[name=email]').val()) == ''){
+
+                            validateErrorEmp({
+                                inputType : 'email',
+                                txt : '이메일을 입력해 주세요.'
+                            });
+                            return false;
+                        }
+                        if($.trim($('input[name=pwd]').val()) == ''){
+
+                            validateErrorEmp({
+                                inputType : 'password',
+                                txt : '비밀번호를 입력해 주세요.'
+                            });
+                            if($(_config.emailInput).hasClass('alert')){
+                                $(_config.emailInput).focus();
+                            }
+                            //_doc.querySelector('[data-loginAlertType]').innerHTML='비밀번호를 입력해 주세요.';
+                            return false;
+                        }
+
+
+
+                        $.post("/member/loginProcess.ytp", {"email" : $('input[name=email]').val(), "pwd" : $('input[name=pwd]').val(), "login_log_yn" : "Y"}, function(result) {
+                            //var result = $.parseJSON(data);
+                            if(result.CHECK=="S"){
+
+                                //이메일저장이 체크가 되어 있다면
+                                if($('#autolog01').prop('checked')){
+                                    $.cookie('saveMail_checked', 'Y', {
+                                        path: '/',
+                                        domain: 'bdsplanet.com',
+                                    });
+                                    $.cookie('userEmail', $('input[name=email]').val(), {
+                                        path: '/',
+                                        domain: 'bdsplanet.com',
+                                    });
+                                }
+
+                                $.cookie('lastLoggedInSNS_b', 'email', { domain: '.bdsplanet.com', path : '/' });
+
+
+                                const openPopFindPw = async(resultPage) => {
+                                    const returnNickName = async() => {
+                                        const meProfileLists = await dApi.getMyProfile();
+                                        const checkConfig = Boolean(meProfileLists.config) ? meProfileLists.config.profile_type : 'PFT00001';
+                                        const currentProfile = meProfileLists.profileList.list.filter(item => item.profile_type === checkConfig);
+                                        const nickName = currentProfile[0].profile_nickname;
+                                        return nickName
+                                    }
+                                    const nickName = await returnNickName();
+
+                                    $(".pop.pop_pwd_change_check_info").html(resultPage).popSet({
+                                        pop_close_btn : ".ui_pop_close",
+                                        animation : true,
+                                        dimm : false,
+                                        NoneWindowScroll : ($("html").css("overflow-y")=='hidden'||$("body").css("overflow-y")=='hidden')?true:false,
+                                        autoOpen : true,
+                                        zIndex : 1001,
+                                        header_ico : "none",
+                                        popallScroll : false,
+                                        mcscroll : false,
+                                        popOpen : async function(){
+                                            _doc.querySelector('.pop_pwd_change_check_info .nickname').innerHTML = nickName;
+                                            $(".gnb_con").on("scroll", function(e){
+                                                e.preventDefault();
+                                                return false;
+                                            });
+                                        },
+                                        popClose : function(){
+                                            $(".pop.pop_pwd_change_check_info").empty();
+                                            $(".gnb_con").off("scroll");
+                                            $("#wrap").removeAttr("style");
+                                        }
+                                    });
+                                }
+
+                                if(!$.isEmptyObject(result.PWD_CHANGE_CALC_DAY) && result.PWD_CHANGE_CALC_DAY>0){
+                                    $.post("/member/pop_pwd_change_check_info.ytp", function(resultPage) {
+                                        openPopFindPw(resultPage)
+                                    }).fail(function(e){
+                                        if(e.status == '401'){ ajaxCallError401(); }
+                                    });
+                                }else{
+
+                                    //프리미엄 유료회원잔여기간 안내 팝업 호출 여부
+                                    $.cookie("ckSsPpPopup", true, {expires : 30,path : '/',domain : _URINOHTTP,secure : false});
+
+                                    //mixpanel 로그인정보 loginProperty 세팅 (이메일)
+                                    mixpanelPlanet.login(function(){
+                                        if(loginParamInfo.reload_yn=="Y"){
+                                            if(loginParamInfo.r_url != ''){
+                                                window.location.href = loginParamInfo.r_url;
+                                            }else{
+                                                window.location.href = "/m/main.ytp";
+                                            }
+                                        }else{
+                                            _LOGIN = "Y";	//top 전역변수만 갱신, 외부로그인은 fnSetJsonText 갱신
+                                            $('.pop.pop_login .ui_pop_close').trigger('click');
+                                        }
+                                    });
+
+                                }
+                            }else if(result.CHECK=="F"){
+                                if(result.MESSAGE.includes("이메일 형식")){
+                                    $('input[name=email]').focus();
+                                    validateErrorEmp({
+                                        inputType : "email",
+                                        txt : result.MESSAGE
+                                    });
+                                } else {
+                                    if(result.MESSAGE.includes("가입하지 않은")){
+                                        commonAlert.popPropertyType({
+											title: "일치하는 회원정보가 없어요",
+											readme : "이메일 또는 비밀번호를 다시 확인해 주세요."
+										}
+										,function(flag){
+											if(flag){
+                                                $('input[name=email]').focus();
+											}
+										},{"txtBtnOk":"확인"});
+                                        return false;
+                                    }
+                                    validateErrorEmp({
+                                        inputType : "password",
+                                        txt : result.MESSAGE,
+                                        focus : !$(_config.emailInput).hasClass('alert')
+                                    });
+                                    if($(_config.emailInput).hasClass('alert')){
+                                        $(_config.emailInput).focus();
+                                    }
+                                }
+
+                                return false;
+                            }else if(result.CHECK=="FS"){
+                                $.post("/member/pop_sleep_user_info.ytp", function(resultPage) {
+                                    $(".pop.pop_sleep_user_info").html(resultPage).popSet({
+                                        pop_close_btn : ".ui_pop_close",
+                                        animation : true,
+                                        dimm : true,
+                                        NoneWindowScroll : ($("html").css("overflow-y")=='hidden'||$("body").css("overflow-y")=='hidden')?true:false,
+                                        autoOpen : true,
+                                        zIndex : 1001,
+                                        header_ico : "none",
+                                        popallScroll : false,
+                                        mcscroll : false,
+                                        popOpen : function(){
+                                            $(".gnb_con").on("scroll", function(e){
+                                                e.preventDefault();
+                                                return false;
+                                            });
+                                        },
+                                        popClose : function(){
+                                            $(".pop.pop_sleep_user_info").empty();
+                                            $(".gnb_con").off("scroll");
+                                            $("#wrap").removeAttr("style");
+                                        }
+                                    });
+                                }).fail(function(e){
+                                    if(e.status == '401'){ ajaxCallError401(); }
+                                });
+                            }else if(result.CHECK=="FB"){
+                                $.post("/member/pop_black_user_info.ytp", function(resultPage) {
+                                    $(".pop.pop_black_user_info").html(resultPage).popSet({
+                                        pop_close_btn : ".ui_pop_close",
+                                        animation : true,
+                                        dimm : true,
+                                        NoneWindowScroll : ($("html").css("overflow-y")=='hidden'||$("body").css("overflow-y")=='hidden')?true:false,
+                                        autoOpen : true,
+                                        zIndex : 1001,
+                                        header_ico : "none",
+                                        popallScroll : false,
+                                        mcscroll : false,
+                                        popOpen : function(){
+                                            $(".gnb_con").on("scroll", function(e){
+                                                e.preventDefault();
+                                                return false;
+                                            });
+                                        },
+                                        popClose : function(){
+                                            $(".pop.pop_black_user_info").empty();
+                                            $(".gnb_con").off("scroll");
+                                            $("#wrap").removeAttr("style");
+                                        }
+                                    });
+                                }).fail(function(e){
+                                    if(e.status == '401'){ ajaxCallError401(); }
+                                });
+                            }
+                        }).fail(function(e){
+                            //console.log(e);
+                            if(e.status == '401'){  ajaxCallError401();}
+                        });
+
+
+                    }else{
+                        if(loginPopup != null) loginPopup.close();
+                        if(login_type=="N"){
+                            loginPopup = window.open('about:blank','naverLoginPop','titlebar=1, resizable=1, scrollbars=yes, width=600, height=550');
+                        }else if(login_type=="F"){
+                            loginPopup = window.open('about:blank', 'facebookLoginPop','width=300,height=300');
+                        }else if(login_type=="K"){
+                            loginPopup = window.open('about:blank', 'kakaoLoginPop','width=410,height=600');
+                        }
+                        $.when(getApiUrlInfo(login_type)).then(
+                            function (d){
+                                //프리미엄 유료회원잔여기간 안내 팝업 호출 여부
+                                $.cookie("ckSsPpPopup", true, {expires : 30,path : '/',domain : _URINOHTTP,secure : false});
+
+                                if(d.login_type=="N"){
+                                    loginPopup.location.href=d.apiURL;
+                                }else if(d.login_type=="F"){
+                                    loginPopup.location.href=d.apiURL;
+                                }else if(d.login_type=="K"){
+                                    loginPopup.location.href=d.apiURL;
+                                }
+                            },
+                            function (f){
+                                loginPopup.close();
+                                //console.log(f);
+                                commonAlert.alert("외부로그인 오류가 발생했습니다.<br>관리자에게 문의하세요<br>오류내용 : "+f,function(flag){if(flag){}});
+                                return false;
+                            }
+                        );
+                    }
+                }
+	        }
+
+			function getApiUrlInfo(login_type, callback){
+				var def = $.Deferred();
+				try{
+                    $.post("/member/getApiUrl.ytp", {"action" : "login", "login_type" : login_type, "reload_yn" : loginParamInfo.reload_yn, "r_url" : loginParamInfo.r_url}, function(jsonStr) {
+                        def.resolve(jsonStr);
+                    }).fail(function(error) {
+                        def.reject(error);
+                    });
+
+					// $.ajax({
+					// 	url : "/member/getApiUrl.ytp",
+		    		// 	type:"post",
+		    		// 	data: {"action" : "login", "login_type" : login_type, "reload_yn" : loginParamInfo.reload_yn, "r_url" : loginParamInfo.r_url},
+		    		// 	dataType : 'json',
+                    //     contentType: 'application/json',
+					// 	timeout : 3000,
+		    		// 	crossDomain:true,
+		    		// 	success:function(jsonStr) { console.log(jsonStr); def.resolve(jsonStr); },
+		    		// 	error: function(xhr,status, error) { console.log(error); def.reject(error); }
+					// });
+				}catch(err){
+					//console.log(err);
+					def.reject(err);
+				}
+				return def.promise();
+			}
+
+			function fnSetJsonText(jsonText){
+
+				var result = $.parseJSON(jsonText);
+                if(!$.isEmptyObject(result._SLEEP_USER_LOGIN) && result._SLEEP_USER_LOGIN=="Y"){
+                    $.post("/member/pop_sleep_user_res_info.ytp", function(resultPage) {
+                        $(".pop.pop_sleep_user_res_info").html(resultPage).popSet({
+                            pop_close_btn : ".ui_pop_close",
+                            animation : true,
+                            dimm : true,
+                            NoneWindowScroll : ($("html").css("overflow-y")=='hidden'||$("body").css("overflow-y")=='hidden')?true:false,
+                            autoOpen : true,
+                            zIndex : 1001,
+                            header_ico : "none",
+                            popallScroll : false,
+                            mcscroll : false,
+                            popOpen : function(){
+                                $(".gnb_con").on("scroll", function(e){
+                                    e.preventDefault();
+                                    return false;
+                                });
+                            },
+                            popClose : function(){
+                                $(".pop.pop_sleep_user_res_info").empty();
+                                $(".gnb_con").off("scroll");
+                                $("#wrap").removeAttr("style");
+                            }
+                        });
+                    }).fail(function(e){
+                        if(e.status == '401'){ ajaxCallError401(); }
+                    });
+                }else{
+                    _LOGIN = result._LOGIN;	//top 전역변수만 갱신, 내부로그인은 goLogin에서 갱신
+                    $('.pop.pop_login .ui_pop_close').trigger('click');
+                }
+			}
+
+            function fnMarketingText(markeingText, url){
+                var result = $.parseJSON(markeingText);
+                if(!$.isEmptyObject(result._MARKETING_CHECK) && result._MARKETING_CHECK=="Y"){
+
+                    //mixpanel 로그인정보 loginProperty 세팅 (외부로그인)
+                    mixpanelPlanet.login(function(){
+                        if(loginParamInfo.reload_yn=="Y"){
+                            window.location.href = url;
+                        }else{
+                            _LOGIN = "Y";	//top 전역변수만 갱신, 외부로그인은 fnSetJsonText 갱신
+                            $('.pop.pop_login .ui_pop_close').trigger('click');
+                        }
+                    });
+                }
+            }
+
+			function goFindEmailPwd(){
+				//$('.pop_login .ui_pop_close').click();
+				goPopFindEmailPwd();
+			}
+
+		</script>
+	</div>
+
+
+	---
+	Request URL
+https://www.bdsplanet.com/member/getApiUrl.ytp
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+110.10.147.113:443
+Referrer Policy
+strict-origin-when-cross-origin
+connection
+Keep-Alive
+content-encoding
+gzip
+content-type
+application/json;charset=utf8
+date
+Wed, 01 Jul 2026 04:41:55 GMT
+keep-alive
+timeout=5, max=98
+server
+Apache
+set-cookie
+isToken=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Domain=bdsplanet.com; Path=/;SameSite=None;Secure;
+set-cookie
+nonMember=; Max-Age=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Domain=bdsplanet.com; Path=/;SameSite=None;Secure;
+strict-transport-security
+max-age=31536000 ; includeSubDomains
+transfer-encoding
+chunked
+vary
+accept-encoding
+x-content-type-options
+nosniff
+x-xss-protection
+1; mode=block
+accept
+*/*
+accept-encoding
+gzip, deflate, br, zstd
+accept-language
+ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,ja-JP;q=0.6,ja;q=0.5
+cache-control
+no-cache
+connection
+keep-alive
+content-length
+44
+content-type
+application/x-www-form-urlencoded; charset=UTF-8
+cookie
+_fbp=fb.1.1778050517332.68270873857863641; _gcl_au=1.1.156145923.1778050517; ckSsPpPopup=true; lastLoggedInSNS_b=kakao; _ga_W0HCMCWKMZ=GS2.1.s1781750261$o3$g1$t1781750272$j49$l0$h0; bdsp_usid=YTZhZjg1MmYtNWY4ZS00YmJkLWFhZGEtM2VkMDFkMzY3MDk4; mp_YOUR_API_KEY_mixpanel=%7B%22distinct_id%22%3A%22%24device%3A44f6d9d3-5f9c-4972-a21c-dc86d6db1179%22%2C%22%24device_id%22%3A%2244f6d9d3-5f9c-4972-a21c-dc86d6db1179%22%2C%22%24search_engine%22%3A%22google%22%2C%22%24initial_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%22www.google.com%22%2C%22__mps%22%3A%7B%7D%2C%22__mpso%22%3A%7B%22%24initial_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%2C%22%24initial_referring_domain%22%3A%22www.google.com%22%7D%2C%22__mpus%22%3A%7B%7D%2C%22__mpa%22%3A%7B%7D%2C%22__mpu%22%3A%7B%7D%2C%22__mpr%22%3A%5B%5D%2C%22__mpap%22%3A%5B%5D%7D; _ga=GA1.2.913664368.1778050517; _gid=GA1.2.140546054.1782880769; adPopHideUntil=2026-07-01; _ga_ZMYFVJ62R4=GS2.1.s1782880766$o13$g1$t1782880800$j26$l0$h0; _gat_UA-72361022-1=1
+host
+www.bdsplanet.com
+origin
+https://www.bdsplanet.com
+pragma
+no-cache
+referer
+https://www.bdsplanet.com/map/realprice_map/7xOonrT4KyF/N/H/1/9584.06.ytp
+sec-ch-ua
+"Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"
+sec-ch-ua-mobile
+?0
+sec-ch-ua-platform
+"Windows"
+sec-fetch-dest
+empty
+sec-fetch-mode
+cors
+sec-fetch-site
+same-origin
+user-agent
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36
+x-requested-with
+XMLHttpRequest
+
+
+action=login&login_type=K&reload_yn=N&r_url=
+
+
+
+{
+  "apiURL" : "https://kauth.kakao.com/oauth/authorize?client_id=YOUR_KAKAO_REST_KEY&redirect_uri=https://www.bdsplanet.com:443/member/kakaoLoginCallback.ytp&state=bd07505c-291e-49fe-81c8-04e88fbbaa83&response_type=code",
+  "login_type" : "K"
+}

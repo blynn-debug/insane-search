@@ -26,16 +26,3 @@ evals/
 .env
 .env.local
 .omc/
-
-# --- Secrets / credentials (never commit) ---
-**/cookies.txt
-**/token.js
-**/captured.txt
-._*
-**/__MACOSX/
-
-# Node
-**/node_modules/
-
-# Excel temp lock files
-~$*

@@ -39,3 +39,6 @@ evals/
 
 # Excel temp lock files
 ~$*
+
+# Scratch working dir (session cookies, API keys, scraped dumps — never commit)
+scratchpad/

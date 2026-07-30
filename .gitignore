@@ -42,3 +42,6 @@ evals/
 
 # Scratch working dir (session cookies, API keys, scraped dumps — never commit)
 scratchpad/
+
+# GitHub 100MB/file hard limit — source PDFs kept local only
+lecture_reference/src/*.pdf

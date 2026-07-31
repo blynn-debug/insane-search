@@ -15,6 +15,20 @@ Google 로그인은 사람이 로컬에서 1회만 하고, 서버는 사이트 �
          실패 시 SNS 이메일
 ```
 
+## 무엇이 어디에 있나 (헷갈리기 쉬움)
+
+| 무엇 | 위치 | 24/7 유지되나 |
+|---|---|---|
+| Google 계정 로그인 | 로컬 Chrome 전용 프로필**에만** | 아니오. AWS 에는 없고, 옮길 수도 없다 |
+| valley.town 세션 쿠키 | SSM `/valley/session` | **예.** Lambda 가 6시간마다 갱신 |
+| 기존 EC2 의 다른 봇들 | 해당 EC2 | 별개. 이 구조와 무관 |
+
+- Google 로그인은 valley.town 쿠키를 받아내기 위한 **문**일 뿐이다. 유지 대상은 valley.town 쿠키다.
+- `deploy_aws.sh` 는 **EC2 에 아무것도 설치하지 않는다.** CloudShell 에서 실행해
+  Lambda / SSM / EventBridge / 알람을 만든다. 기존 EC2 와는 별개다.
+- **로컬 컴퓨터는 어느 것이든 상관없다.** 맥이든 윈도우든, 심지어 전부 꺼져 있어도
+  SSM ↔ Lambda 는 계속 돈다. 로컬이 필요한 건 재로그인할 때뿐이다.
+
 ## AWS 리소스
 
 리전 `ap-northeast-2`. 계정 ID는 `aws sts get-caller-identity` 로 확인.
@@ -78,6 +92,41 @@ aws configure                          # 스크래퍼/배포용
 (아래 제약 참고). 새 PC에서 새로 로그인하면 되고, push 하면 SSM 이 갱신되어 서버도 새 세션을 쓴다.
 
 AWS 인프라는 이미 떠 있으므로 `deploy_aws.sh` 를 다시 돌릴 필요는 없다.
+
+`browser_cookies.py` 는 Windows / macOS / Linux 의 Chrome 경로를 모두 찾는다.
+전용 프로필 위치는 OS 마다 다르다:
+
+| OS | 전용 프로필 |
+|---|---|
+| Windows | `%LOCALAPPDATA%\chrome-cdp-profile` |
+| macOS | `~/Library/Application Support/chrome-cdp-profile` |
+| Linux | `~/.config/chrome-cdp-profile` |
+
+(macOS 경로는 코드상 반영만 했고 실기 검증은 아직 못 했다.)
+
+## keepalive 를 EC2 cron 으로 옮기려면
+
+기본은 Lambda 다. EC2 가 꺼지거나 재부팅해도 안 멈추기 때문이다.
+**단, 스크래퍼가 특정 EC2 에서 돈다면** 거기로 합치는 편이 낫다.
+Lambda 는 실행마다 다른 IP 를 쓰는데, 일부 사이트는 같은 세션이 여러 IP 에서
+제시되는 걸 이상 징후로 본다. 스크래퍼와 keepalive 의 IP 를 하나로 통일하는 효과가 있다.
+
+"AWS 차단을 피하려고" 옮기는 건 의미가 없다. Lambda 도 EC2 도 똑같은 AWS 대역이다.
+그리고 keepalive 는 하루 4회 요청이라 차단 대상이 될 수준이 아니다.
+
+옮길 때는 **반드시 Lambda 스케줄을 먼저 끈다.** 둘 다 돌면 토큰 회전 시 경합이 생겨
+한쪽이 낡은 토큰으로 새 토큰을 덮어쓸 수 있다.
+
+```bash
+aws events disable-rule --name valley-keepalive-6h
+aws cloudwatch delete-alarms --alarm-names valley-keepalive-not-running
+
+# EC2 에서 (권한은 액세스 키 대신 인스턴스 역할로 주는 걸 권장)
+crontab -e
+0 */6 * * * cd ~/insane-search && SNS_TOPIC_ARN=<토픽ARN> /usr/bin/python3 session_keeper.py keepalive --store ssm:/valley/session >> /var/log/valley-keepalive.log 2>&1
+```
+
+cron 은 조용히 죽어도 아무도 모른다. `SNS_TOPIC_ARN` 을 반드시 넣어 세션 만료 알림은 살려둘 것.
 
 ## 실측으로 확인된 제약 (2026-07-31)
 

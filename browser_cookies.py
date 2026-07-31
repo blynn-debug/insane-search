@@ -26,13 +26,29 @@ import sys
 import time
 import urllib.request
 
-DEFAULT_PROFILE = os.path.join(
-    os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "chrome-cdp-profile"
-)
+IS_WIN = os.name == "nt"
+IS_MAC = sys.platform == "darwin"
+
+if IS_WIN:
+    _PROFILE_BASE = os.environ.get("LOCALAPPDATA", os.path.expanduser("~"))
+elif IS_MAC:
+    _PROFILE_BASE = os.path.expanduser("~/Library/Application Support")
+else:
+    _PROFILE_BASE = os.path.expanduser("~/.config")
+DEFAULT_PROFILE = os.path.join(_PROFILE_BASE, "chrome-cdp-profile")
+
 CHROME_CANDIDATES = [
+    # Windows
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
     os.path.join(os.environ.get("LOCALAPPDATA", ""), r"Google\Chrome\Application\chrome.exe"),
+    # macOS
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    os.path.expanduser("~/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
+    "/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta",
+    # Linux
+    "/usr/bin/google-chrome",
+    "/usr/bin/chromium-browser",
 ]
 
 
@@ -48,10 +64,11 @@ def find_chrome():
     for p in CHROME_CANDIDATES:
         if p and os.path.exists(p):
             return p
-    p = shutil.which("chrome")
-    if p:
-        return p
-    raise SystemExit("chrome.exe 를 못 찾았다. --chrome 으로 경로를 지정해라.")
+    for name in ("chrome", "google-chrome", "chromium"):
+        p = shutil.which(name)
+        if p:
+            return p
+    raise SystemExit("Chrome 실행파일을 못 찾았다. --chrome 으로 경로를 지정해라.")
 
 
 def port_open(port):
@@ -172,9 +189,10 @@ def log_line(path, msg):
     print(line, file=sys.stderr)
     if path:
         os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
-        # 메모장/PowerShell이 한글을 ANSI로 잘못 읽지 않도록 새 파일에만 BOM을 붙인다.
+        # 윈도우 메모장/PowerShell이 한글을 ANSI로 잘못 읽지 않도록 새 파일에만 BOM을 붙인다.
         # (append 마다 utf-8-sig 로 열면 BOM이 파일 중간에 끼어든다)
-        new = not os.path.exists(path) or os.path.getsize(path) == 0
+        # mac/리눅스는 UTF-8이 기본이라 BOM이 오히려 지저분하므로 붙이지 않는다.
+        new = IS_WIN and (not os.path.exists(path) or os.path.getsize(path) == 0)
         with open(path, "a", encoding="utf-8") as f:
             if new:
                 f.write("﻿")

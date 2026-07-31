@@ -29,6 +29,8 @@ evals/
 
 # --- Secrets / credentials (never commit) ---
 **/cookies.txt
+**/cookies.json
+**/*.expiry.json
 **/token.js
 **/captured.txt
 ._*

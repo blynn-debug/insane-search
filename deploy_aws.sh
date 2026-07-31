@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 # valley.town 세션 keepalive 를 AWS 에 배포한다. CloudShell 에서 실행.
 #
-#   1) 쿠키를 SSM Parameter Store(SecureString)에 저장
-#   2) Lambda 함수 생성 (session_keeper.handler)
-#   3) EventBridge 로 6시간마다 실행
-#   4) (선택) 세션 만료 시 이메일 알림
+#   1) 쿠키(+만료시각)를 SSM Parameter Store(SecureString)에 저장
+#   2) IAM 역할
+#   3) Lambda 함수 (session_keeper.handler)
+#   4) EventBridge 로 6시간마다 실행
+#   5) (선택) 실패/무실행 알람
 #
 # 사용:
-#   session_keeper.py, cookies.txt, deploy_aws.sh 를 CloudShell 에 올린 뒤
+#   session_keeper.py, cookies.json, deploy_aws.sh 를 CloudShell 에 올린 뒤
 #     bash deploy_aws.sh
+#
+#   cookies.json 은 만료시각을 담고 있어 "만료 임박 사전 경고"를 받을 수 있다:
+#     browser_cookies.py valley.town --format json -o cookies.json
+#   (cookies.txt 만 있어도 동작하지만 사전 경고는 못 받는다)
 #   알림까지 받으려면
 #     EMAIL=you@example.com bash deploy_aws.sh
 #
@@ -27,15 +32,19 @@ ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 echo "== 계정 ${ACCOUNT} / 리전 ${REGION}"
 
 # ---------------------------------------------------------------- 1) 쿠키 저장
-if [ ! -f cookies.txt ]; then
-  echo "!! cookies.txt 가 없다. 로컬에서 만들어 올려라." >&2; exit 1
+# cookies.json(--format json)이면 만료 시각까지 기록돼 사전 경고를 받을 수 있다. 이쪽을 우선한다.
+if [ -f cookies.json ] && grep -q '__Secure-nf.session-token' cookies.json; then
+  python3 session_keeper.py push --store "ssm:${PARAM}" --from cookies.json
+  echo "== 1/5 쿠키 + 만료시각을 SSM 에 저장했다"
+elif [ -f cookies.txt ] && grep -q '__Secure-nf.session-token' cookies.txt; then
+  aws ssm put-parameter --name "$PARAM" --type SecureString \
+    --value "$(tr -d '\r\n' < cookies.txt)" --overwrite >/dev/null
+  echo "== 1/5 쿠키를 SSM 에 저장했다 (만료시각 없음 - 사전 경고 불가)"
+  echo "   사전 경고를 받으려면: browser_cookies.py valley.town --format json -o cookies.json"
+else
+  echo "!! 세션 토큰이 든 cookies.json 또는 cookies.txt 가 없다. 로컬에서 로그인부터 해라." >&2
+  exit 1
 fi
-if ! grep -q '__Secure-nf.session-token' cookies.txt; then
-  echo "!! cookies.txt 에 세션 토큰이 없다. 로그인부터 해라." >&2; exit 1
-fi
-aws ssm put-parameter --name "$PARAM" --type SecureString \
-  --value "$(tr -d '\r\n' < cookies.txt)" --overwrite >/dev/null
-echo "== 1/4 쿠키를 SSM ${PARAM} 에 저장했다"
 
 # ---------------------------------------------------------------- 2) IAM 역할
 if ! aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
@@ -44,10 +53,10 @@ if ! aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
     "Statement":[{"Effect":"Allow","Principal":{"Service":"lambda.amazonaws.com"},"Action":"sts:AssumeRole"}]}' >/dev/null
   aws iam attach-role-policy --role-name "$ROLE" \
     --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  echo "== 2/4 IAM 역할 생성. 전파 대기 15초..."
+  echo "== 2/5 IAM 역할 생성. 전파 대기 15초..."
   sleep 15
 else
-  echo "== 2/4 IAM 역할 재사용"
+  echo "== 2/5 IAM 역할 재사용"
 fi
 
 # 쿠키 파라미터 하나에만 접근. KMS 는 SSM 을 통한 호출로만 제한한다.
@@ -55,7 +64,8 @@ aws iam put-role-policy --role-name "$ROLE" --policy-name "${NAME}-ssm" --policy
   \"Version\":\"2012-10-17\",
   \"Statement\":[
     {\"Effect\":\"Allow\",\"Action\":[\"ssm:GetParameter\",\"ssm:PutParameter\"],
-     \"Resource\":\"arn:aws:ssm:${REGION}:${ACCOUNT}:parameter${PARAM}\"},
+     \"Resource\":[\"arn:aws:ssm:${REGION}:${ACCOUNT}:parameter${PARAM}\",
+                   \"arn:aws:ssm:${REGION}:${ACCOUNT}:parameter${PARAM}-expiry\"]},
     {\"Effect\":\"Allow\",\"Action\":[\"kms:Decrypt\",\"kms:Encrypt\"],\"Resource\":\"*\",
      \"Condition\":{\"StringEquals\":{\"kms:ViaService\":\"ssm.${REGION}.amazonaws.com\"}}}
   ]}"
@@ -83,7 +93,7 @@ if aws lambda get-function --function-name "$NAME" >/dev/null 2>&1; then
   aws lambda update-function-configuration --function-name "$NAME" \
     --timeout 30 --environment "Variables={${ENV_VARS}}" >/dev/null
   aws lambda wait function-updated --function-name "$NAME"
-  echo "== 3/4 Lambda 갱신"
+  echo "== 3/5 Lambda 갱신"
 else
   aws lambda create-function --function-name "$NAME" \
     --runtime "$RUNTIME" --handler session_keeper.handler \
@@ -91,7 +101,7 @@ else
     --zip-file "fileb://${NAME}.zip" --timeout 30 \
     --environment "Variables={${ENV_VARS}}" >/dev/null
   aws lambda wait function-active --function-name "$NAME"
-  echo "== 3/4 Lambda 생성"
+  echo "== 3/5 Lambda 생성"
 fi
 
 # ---------------------------------------------------------------- 4) 스케줄
@@ -101,7 +111,7 @@ aws lambda add-permission --function-name "$NAME" --statement-id "${RULE}-invoke
   --source-arn "arn:aws:events:${REGION}:${ACCOUNT}:rule/${RULE}" >/dev/null 2>&1 || true
 aws events put-targets --rule "$RULE" \
   --targets "Id=1,Arn=arn:aws:lambda:${REGION}:${ACCOUNT}:function:${NAME}" >/dev/null
-echo "== 4/4 EventBridge ${SCHEDULE} 등록"
+echo "== 4/5 EventBridge ${SCHEDULE} 등록"
 
 # ---------------------------------------------------------------- 5) 알람
 # 세션 만료는 스크립트가 직접 SNS 로 알린다. 하지만 그 외의 실패

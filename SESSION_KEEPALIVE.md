@@ -73,11 +73,28 @@ py -3.14 browser_cookies.py valley.town --open
 #   창이 뜨면 Google 계정으로 로그인.
 #   "Chrome에 로그인하시겠습니까?" 팝업은 브라우저 동기화라 무시할 것.
 
-py -3.14 browser_cookies.py valley.town -o cookies.txt --require "__Secure-nf.session-token"
-#   exit 0 이면 성공
+py -3.14 browser_cookies.py valley.town --format json -o cookies.json --require "__Secure-nf.session-token"
+#   exit 0 이면 성공. json 으로 뽑아야 만료 시각이 같이 담겨 사전 경고를 받을 수 있다.
 
-# cookies.txt 를 CloudShell 에 올린 뒤
-python3 session_keeper.py push --store ssm:/valley/session --from cookies.txt
+# cookies.json 을 CloudShell 에 올린 뒤 (같은 이름 파일이 있으면 rm 후 업로드)
+python3 session_keeper.py push --store ssm:/valley/session --from cookies.json
+```
+
+## 만료 임박 사전 경고
+
+재로그인에는 사람과 로컬 브라우저가 필요하다. 죽은 뒤에 알리면 늦으므로
+만료 **48시간 전**에 미리 SNS 로 알린다(`--warn-hours`, 기본 48).
+
+- 만료 시각은 `push` 할 때 `cookies.json` 에서 읽어 `/valley/session-expiry` 에 기록한다.
+  `cookies.txt` 로 push 하면 만료를 알 수 없어 사전 경고가 비활성된다.
+- 회전이 일어나 만료가 밀리면 자동으로 갱신되고 경고 플래그도 풀린다.
+- 경고는 만료 주기당 **한 번만** 발송된다(`warned_at` 으로 중복 차단).
+- 메타가 깨졌거나 읽히지 않으면 로그에 남긴다. 조용히 비활성되지 않는다.
+
+현재 상태 확인:
+
+```bash
+aws ssm get-parameter --name /valley/session-expiry --query Parameter.Value --output text
 ```
 
 ## 새 컴퓨터에서 시작할 때

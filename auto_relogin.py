@@ -175,6 +175,19 @@ def main():
             if left > args.renew_before:
                 log_line(args.log_file,
                          f"[o] 아직 {left/24:.1f}일 남았다. 갱신 불필요 (--force 로 강제 가능)")
+                # 저장소 메타가 실제 쿠키와 어긋나 있으면 바로잡는다.
+                # 안 그러면 매번 여기까지 와서 Chrome 을 띄우고(메모리 낭비),
+                # 만료 경고도 엉뚱한 시점에 나간다. 스스로 못 고치는 상태가 된다.
+                if args.store and cur.get("expires"):
+                    real = datetime.datetime.fromtimestamp(
+                        cur["expires"], datetime.timezone.utc).isoformat()
+                    try:
+                        from session_keeper import meta_read, meta_write
+                        if meta_read(args.store).get("expires_at") != real:
+                            meta_write(args.store, {"expires_at": real})
+                            log_line(args.log_file, f"[o] 저장소 만료 정보를 실제값으로 바로잡았다")
+                    except Exception as e:
+                        log_line(args.log_file, f"[!] 만료 정보 보정 실패: {e}")
                 return 0
 
         tab = Tab(args.port)

@@ -10,6 +10,8 @@ REPO=$(pwd)
 R="sudo -u ec2-user AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-ap-northeast-2}"
 MIRROR=${MIRROR_FILE:-/home/ec2-user/.valley/cookies.txt}
 PARAM=${PARAM:-/valley/session}
+PARAM_STORE="ssm:$PARAM"
+export MIRROR_FILE="$MIRROR"
 QUICK=${1:-}
 PASS=0; FAIL=0
 ok(){ echo "  PASS  $1"; PASS=$((PASS+1)); }
@@ -102,12 +104,26 @@ RES=$(systemctl show valley-relogin.service -p Result --value)
 wait $MON 2>/dev/null
 MIN=$(sort -n /tmp/m.log | head -1); rm -f /tmp/m.log
 [ "$RES" = "success" ] && ok "D1 서비스 정상 종료" || ng "D1 $RES"
-svc_log | grep -q "세션이 죽어있다" && ok "D2 메타를 맹신하지 않고 실제 생존 확인" || ng "D2 감지 실패"
-svc_log | grep -q "새 세션 발급 완료" && ok "D3 자동 재발급" || ng "D3 재발급 안 됨"
+svc_log | grep -q "저장소 세션이 죽어있다" && ok "D2 메타를 맹신하지 않고 실제 생존 확인" || ng "D2 감지 실패"
+# 프로필 세션이 멀쩡하면 재로그인 없이 저장소만 맞추는 게 옳다(불필요한 OAuth 왕복 회피).
+svc_log | grep -qE "새 세션 발급 완료|저장소만 다시 맞춘다" \
+  && ok "D3 복구 동작 수행" || ng "D3 아무 조치 없음"
 cookie | grep -q "DEAD_FOR_TEST" && ng "D4 SSM 복구 안 됨" || ok "D4 SSM 쿠키 복구"
-[ "$BEFORE_MIRROR" != "$(md5sum $MIRROR | cut -d' ' -f1)" ] && ok "D5 미러 갱신" || ng "D5 미러 그대로"
+# 미러는 '바뀌었는지' 가 아니라 '저장소와 일치하는지' 가 요구사항이다.
+[ "$(cat $MIRROR)" = "$(cookie)" ] && ok "D5 미러가 저장소와 일치" || ng "D5 미러 불일치"
 awk -v m="$MIN" 'BEGIN{exit !(m > 150)}' && ok "D6 메모리 안전(최저 ${MIN}MB)" || ng "D6 위험(${MIN}MB)"
 [ "$(pgrep -cf chrome-cdp-profile)" = "0" ] && ok "D7 잔여 없음" || ng "D7 잔류"
+
+sec "D'. 실제 재로그인 경로 (강제)"
+BEFORE_TOKEN=$(cookie | grep -oP '__Secure-nf.session-token=\K[^;]{0,20}')
+$R xvfb-run -a python3 auto_relogin.py valley.town --force \
+   --port 9477 --profile /home/ec2-user/.config/chrome-cdp-profile \
+   --store $PARAM_STORE 2>&1 | grep -vE "PythonDeprecation|warnings.warn" | tail -3
+AFTER_TOKEN=$(cookie | grep -oP '__Secure-nf.session-token=\K[^;]{0,20}')
+[ -n "$AFTER_TOKEN" ] && [ "$BEFORE_TOKEN" != "$AFTER_TOKEN" ] \
+  && ok "D'1 OAuth 재로그인으로 새 토큰 발급" || ng "D'1 토큰이 그대로"
+[ "$(cat $MIRROR)" = "$(cookie)" ] && ok "D'2 미러도 새 값으로 갱신" || ng "D'2 미러 불일치"
+[ "$(pgrep -cf chrome-cdp-profile)" = "0" ] && ok "D'3 잔여 없음" || ng "D'3 잔류"
 
 sec "E. 메타 드리프트 자가 교정 (파괴적)"
 $R aws ssm put-parameter --name ${PARAM}-expiry --type SecureString --overwrite \

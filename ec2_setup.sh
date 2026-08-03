@@ -10,6 +10,18 @@
 # 설치 후 사람이 할 일은 아래 "1회 Google 로그인" 뿐이다.
 set -euo pipefail
 
+# CloudShell 에서 잘못 실행하는 걸 막는다. 여기는 24/7 도 아니고 systemd 도 없다.
+if [ -n "${AWS_EXECUTION_ENV:-}" ] && [ "${AWS_EXECUTION_ENV}" = "CloudShell" ] \
+   || [ "$(id -un)" = "cloudshell-user" ] || [ -d /aws/mde ]; then
+  echo "!! 여기는 CloudShell 이다. 이 스크립트는 24/7 로 켜져 있는 EC2 에서 돌려야 한다." >&2
+  echo "   CloudShell 은 세션이 끝나면 사라지고 systemd 도 없다." >&2
+  exit 1
+fi
+if ! command -v systemctl >/dev/null 2>&1; then
+  echo "!! systemd 가 없는 환경이다. EC2 인스턴스에서 실행해라." >&2
+  exit 1
+fi
+
 REPO_DIR="${REPO_DIR:-$HOME/insane-search}"
 PROFILE="${PROFILE:-$HOME/.config/chrome-cdp-profile}"
 PORT="${PORT:-9222}"
@@ -32,7 +44,9 @@ elif command -v apt-get >/dev/null 2>&1; then
 else
   echo "!! dnf/apt 를 못 찾았다. Chrome 을 수동 설치해라." >&2; exit 1
 fi
-$PYBIN -m pip install --quiet --user websocket-client boto3
+# venv 안에서는 --user 가 거부된다. 되는 쪽으로 알아서 넘어간다.
+$PYBIN -m pip install --quiet --user websocket-client boto3 2>/dev/null \
+  || $PYBIN -m pip install --quiet websocket-client boto3
 
 echo "== 2/5 저장소"
 if [ -d "$REPO_DIR/.git" ]; then

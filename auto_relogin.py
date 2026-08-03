@@ -217,6 +217,18 @@ def main():
 
         left = (got.get("expires", 0) - time.time()) / 86400
         log_line(args.log_file, f"[o] 새 세션 발급 완료 ({left:.1f}일짜리)")
+
+        # 쿠키는 Chrome 이 살아있는 동안 꺼내야 한다.
+        # 종료 후 별도 프로세스로 다시 띄워 읽으면, 방금 받은 세션이 아직 디스크에
+        # 안 내려가 있어 '쿠키 없음' 으로 실패한다(실측).
+        if args.store:
+            jar = [c for c in cdp_call(bws, "Storage.getCookies")["cookies"]
+                   if match_domain(c["domain"], args.domain)]
+            cookie_json = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                       "_auto_cookies.json")
+            with open(cookie_json, "w", encoding="utf-8") as f:
+                json.dump(jar, f, ensure_ascii=False)
+            log_line(args.log_file, f"[o] 쿠키 {len(jar)}개 추출 (Chrome 종료 전)")
     finally:
         if tab:
             tab.close()
@@ -230,11 +242,8 @@ def main():
     if args.store:
         here = os.path.dirname(os.path.abspath(__file__))
         tmp = os.path.join(here, "_auto_cookies.json")
-        r = subprocess.run([sys.executable, "browser_cookies.py", args.domain,
-                            "--format", "json", "-o", tmp, "--require", TOKEN,
-                            "--port", str(args.port)], cwd=here)
-        if r.returncode != 0:
-            log_line(args.log_file, "[X] 쿠키 추출 실패")
+        if not os.path.exists(tmp):
+            log_line(args.log_file, "[X] 추출된 쿠키 파일이 없다")
             return 3
         r = subprocess.run([sys.executable, "session_keeper.py", "push",
                             "--store", args.store, "--from", tmp, "--require", TOKEN],

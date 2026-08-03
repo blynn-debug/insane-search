@@ -64,9 +64,21 @@ aws logs tail /aws/lambda/valley-keepalive --since 24h
 aws lambda invoke --function-name valley-keepalive /tmp/out.json && cat /tmp/out.json
 ```
 
-## 재로그인 (세션이 죽어서 알림이 왔을 때)
+## 재로그인 (5일마다 / 알림이 왔을 때)
 
 Google 로그인은 자동화가 막혀 있어 이 부분만 사람이 해야 한다.
+**`relogin.py` 가 전 과정을 한 명령으로 묶는다:**
+
+```bash
+py -3.14 relogin.py valley.town
+#   1) 전용 Chrome 창이 열린다 -> 로그인하고 Enter
+#   2) 쿠키 추출 (만료 시각 포함)
+#   3) 저장소 반영
+#   4) 확인
+```
+
+로컬에 boto3/자격증명이 없으면 3단계에서 `cookies.json` 까지만 만들고
+CloudShell 절차를 안내한다. 아래는 그 수동 절차다.
 
 ```bash
 py -3.14 browser_cookies.py valley.town --open
@@ -191,18 +203,16 @@ exit 3 으로 죽는다(낡은 쿠키를 빈 값으로 날리지 않기 위해).
 
 ## 미확정 사항
 
-**롤링 갱신이 실제로 도는지 아직 관측되지 않았다.**
-로그인 직후 몇 시간 동안은 `회전 없음` 만 찍혔다(정상 — 보통 갱신 주기가 24시간).
+~~롤링 갱신이 도는지 미확인~~ → **2026-08-03 확정: 롤링 갱신은 없다.**
 
-확인 방법:
+3일간 관측 결과 만료 시각이 전혀 밀리지 않았다(`expires_at` 이 발급 시점 그대로).
+인증된 페이지(`/newsroom`, `/premium/lounge`, `/live-narratives`)가 200 을 주면서도
+세션 쿠키를 재발급하지 않고, 세션 재발급용 엔드포인트도 없다
+(`/api/auth/session`, `/api/auth/csrf` 등 후보 7개 전부 404).
 
-```bash
-aws logs tail /aws/lambda/valley-keepalive --since 24h | grep -E "갱신|회전"
-```
-
-- `쿠키 갱신 N건` 이 찍히면 → 롤링 확인. 재로그인 없이 무기한 유지된다.
-- 계속 `회전 없음` 이면 → 발급 후 5일에 만료. 그때마다 재로그인이 필요하다.
-  이 경우 "만료 임박(24시간 전) 사전 알림" 추가를 검토할 것.
+**결론: 세션은 발급 후 5일 고정이고, HTTP 로 연장할 방법이 없다.**
+5일마다 사람이 재로그인해야 한다. keepalive 의 역할은 "유지"가 아니라
+**만료 감지와 48시간 전 사전 경고**다.
 
 **valley.town 의 동시접속 제한 여부도 미확인.**
 제한이 있다면 로컬 전용 창에서 valley.town 을 다시 쓸 때 서버 쪽 세션이 끊길 수 있다.

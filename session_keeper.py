@@ -43,6 +43,30 @@ def log(msg):
 
 # ---------------------------------------------------------------- 저장소
 
+def _boto(service):
+    """EC2 안에서는 리전이 설정돼 있지 않은 경우가 많다. 메타데이터에서 찾아 넣는다.
+
+    (실측: EC2 cron 에서 'You must specify a region' 로 실패했다)
+    """
+    import boto3
+    region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")
+    if not region:
+        try:
+            req = urllib.request.Request(
+                "http://169.254.169.254/latest/api/token", method="PUT",
+                headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"})
+            with urllib.request.urlopen(req, timeout=2) as r:
+                token = r.read().decode()
+            req = urllib.request.Request(
+                "http://169.254.169.254/latest/meta-data/placement/region",
+                headers={"X-aws-ec2-metadata-token": token})
+            with urllib.request.urlopen(req, timeout=2) as r:
+                region = r.read().decode().strip()
+        except Exception:
+            region = None
+    return boto3.client(service, region_name=region) if region else boto3.client(service)
+
+
 def store_read(spec):
     kind, _, ref = spec.partition(":")
     if kind == "file":
@@ -51,8 +75,7 @@ def store_read(spec):
         with open(ref, encoding="utf-8") as f:
             return f.read().strip()
     if kind == "ssm":
-        import boto3
-        ssm = boto3.client("ssm")
+        ssm = _boto("ssm")
         try:
             r = ssm.get_parameter(Name=ref, WithDecryption=True)
             return r["Parameter"]["Value"].strip()
@@ -68,9 +91,8 @@ def store_write(spec, value):
             f.write(value + "\n")
         return
     if kind == "ssm":
-        import boto3
         # SecureString: KMS 기본키로 암호화된다. Standard tier 는 과금 없음.
-        boto3.client("ssm").put_parameter(
+        _boto("ssm").put_parameter(
             Name=ref, Value=value, Type="SecureString", Overwrite=True
         )
         return
@@ -336,8 +358,7 @@ def notify(args, message):
     if not topic:
         return
     try:
-        import boto3
-        boto3.client("sns").publish(TopicArn=topic, Subject="valley 세션 만료", Message=message)
+        _boto("sns").publish(TopicArn=topic, Subject="valley 세션 만료", Message=message)
         log("[i] SNS 알림 발송")
     except Exception as e:
         log(f"[!] SNS 알림 실패: {e}")

@@ -63,13 +63,33 @@ AVAIL=$(free -m | awk '/^Mem:/{print $7}')
 SWAP=$(free -m | awk '/^Swap:/{print $2}')
 echo "   사용가능 메모리 ${AVAIL}MB / 스왑 ${SWAP}MB"
 if [ "$AVAIL" -lt 900 ] && [ "$SWAP" -lt 2048 ]; then
-  echo "   여유가 빠듯하다. 스왑을 2GB 로 늘린다."
-  if [ -f /swapfile ]; then sudo swapoff /swapfile && sudo rm -f /swapfile; fi
-  sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none
-  sudo chmod 600 /swapfile && sudo mkswap -q /swapfile && sudo swapon /swapfile
-  grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
-  echo "   스왑 확장 완료: $(free -m | awk '/^Swap:/{print $2}')MB"
+  # 기존 스왑은 절대 건드리지 않는다. 별도 파일을 추가로 붙인다.
+  # (이전 버전은 기존 스왑을 먼저 지운 뒤 생성에 실패해 스왑이 0 이 된 적이 있다)
+  if [ ! -f /swapfile2 ]; then
+    echo "   여유가 빠듯하다. 스왑 2GB 를 추가한다(기존 스왑은 유지)."
+    if sudo dd if=/dev/zero of=/swapfile2 bs=1M count=2048 status=none \
+       && sudo chmod 600 /swapfile2 && sudo mkswap /swapfile2 >/dev/null; then
+      sudo swapon /swapfile2
+      grep -q '^/swapfile2' /etc/fstab || echo '/swapfile2 none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+      echo "   스왑 합계: $(free -m | awk '/^Swap:/{print $2}')MB"
+    else
+      echo "   !! 스왑 추가 실패. 기존 스왑은 그대로다." >&2
+      sudo rm -f /swapfile2
+    fi
+  else
+    echo "   /swapfile2 가 이미 있다. 건너뛴다."
+  fi
 fi
+
+# boto3 는 리전을 모르면 실패한다. EC2 라면 메타데이터에서 가져온다.
+if [ -z "${AWS_DEFAULT_REGION:-}" ]; then
+  TOK=$(curl -s -m 3 -X PUT "http://169.254.169.254/latest/api/token" \
+        -H "X-aws-ec2-metadata-token-ttl-seconds: 60" || true)
+  AWS_DEFAULT_REGION=$(curl -s -m 3 -H "X-aws-ec2-metadata-token: $TOK" \
+        http://169.254.169.254/latest/meta-data/placement/region || true)
+  export AWS_DEFAULT_REGION
+fi
+echo "   리전: ${AWS_DEFAULT_REGION:-(못 찾음)}"
 mkdir -p "$PROFILE"
 
 echo "== 4/5 상태 확인 (Chrome 은 갱신이 필요할 때만 뜬다)"
@@ -78,7 +98,12 @@ $PYBIN auto_relogin.py valley.town --port "$PORT" --profile "$PROFILE" --store "
 
 if [ "${1:-}" = "--cron" ]; then
   echo "== 5/5 cron 등록 (12시간마다)"
-  LINE="0 */12 * * * cd $REPO_DIR && $PYBIN auto_relogin.py valley.town --port $PORT --profile $PROFILE --store $STORE --log-file $HOME/valley-relogin.log >> $HOME/valley-relogin.log 2>&1"
+  if ! command -v crontab >/dev/null 2>&1; then
+    echo "   crontab 이 없다. cronie 를 설치한다."
+    sudo dnf install -y cronie >/dev/null
+    sudo systemctl enable --now crond
+  fi
+  LINE="0 */12 * * * cd $REPO_DIR && AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION $PYBIN auto_relogin.py valley.town --port $PORT --profile $PROFILE --store $STORE --log-file $HOME/valley-relogin.log >> $HOME/valley-relogin.log 2>&1"
   ( crontab -l 2>/dev/null | grep -v auto_relogin.py ; echo "$LINE" ) | crontab -
   crontab -l | grep auto_relogin.py
 else

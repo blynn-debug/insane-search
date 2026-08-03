@@ -104,6 +104,10 @@ def launch_chrome(chrome, profile, port, url, show):
         "--disable-extensions",
         "--renderer-process-limit=2",
     ]
+    if not IS_WIN:
+        # 서버(컨테이너/EC2)에서는 샌드박스 네임스페이스가 없어 Chrome 이 그대로 죽는다.
+        # 우리가 띄우는 프로필은 우리 스크립트 전용이라 영향 범위가 좁다.
+        args += ["--no-sandbox", "--disable-setuid-sandbox"]
     if not show:
         # 창을 화면 밖으로 보내 눈에 안 띄게 한다. headless 는 로그인 세션 재사용이
         # 불안정한 경우가 있어 기본값으로 쓰지 않는다.

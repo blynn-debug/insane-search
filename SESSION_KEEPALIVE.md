@@ -233,24 +233,59 @@ py -3.14 auto_relogin.py valley.town --store ssm:/valley/session
 - 페이지 문구가 바뀌면 **exit 5** + 스크린샷(`--shot-dir`). 조용히 실패하지 않는다.
 - 버튼은 화면 문구로 찾는다(`MORE_RE`, `IDP_RE`). 사이트가 문구를 바꾸면 거기만 고친다.
 
-### 24/7 무인 운영 (구조 B)
+### 24/7 무인 운영 (구조 B) — 2026-08-03 구축 완료
 
-로컬 PC 없이 돌리려면 EC2 에 Chrome 을 올리고 Google 로그인을 1회만 해둔다.
+EC2 에 Chrome 을 올리고 Google 로그인을 1회만 해두면 로컬 PC 와 완전히 무관해진다.
+**데이터센터 IP 에서도 Google 로그인이 통과했다.**
+
+현재 구성 (인스턴스 `i-0cdab85ab7b2918ec`, t3.small):
+
+| 항목 | 값 |
+|---|---|
+| systemd 타이머 | `valley-relogin.timer` — 매일 03,15시 UTC |
+| 서비스 | `valley-relogin.service` — `xvfb-run` 으로 감싸 실행 |
+| 프로필 | `/home/ec2-user/.config/chrome-cdp-profile` |
+| 저장소 | `ssm:/valley/session` |
+| 로그 | `/home/ec2-user/valley-relogin.log`, `journalctl -u valley-relogin` |
+
+**Chrome 을 상시 띄우지 않는다.** 타이머가 돌 때마다 SSM 의 만료 시각을 먼저 읽고,
+여유가 있으면 그대로 끝낸다. 실제로 Chrome 이 뜨는 건 4~5일에 한 번, 몇 초뿐이다.
+그때만 `xvfb-run` 이 가상 디스플레이를 띄우고 끝나면 정리한다(잔여 프로세스 0).
+
+t3.small 은 여유 메모리가 500~900MB 뿐이고 node 봇 7개가 상주하므로
+Chrome 상시 기동은 OOM 위험이 있다. 그래서 이 구조를 택했다.
+
+#### 1회 Google 로그인 (구축 시에만)
+
+SSH 키가 없어도 SSM 으로 된다. 로컬에 AWS CLI + Session Manager 플러그인이 필요하다.
 
 ```bash
-bash ec2_setup.sh --cron
+# EC2: Xvfb + Chrome + VNC 를 임시로 띄운다
+Xvfb :99 -screen 0 1280x900x24 -nolisten tcp &
+DISPLAY=:99 google-chrome --remote-debugging-port=9222 \
+  --user-data-dir=$HOME/.config/chrome-cdp-profile --no-sandbox \
+  --disable-dev-shm-usage about:blank &
+x0vncserver -display :99 -rfbport 5900 -SecurityTypes None -localhost &
+/opt/novnc/utils/websockify/run --web /opt/novnc 127.0.0.1:6080 localhost:5900 &
+
+# 로컬: 터널
+aws ssm start-session --target <인스턴스ID> \
+  --document-name AWS-StartPortForwardingSession \
+  --parameters portNumber=6080,localPortNumber=6080
+
+# 브라우저에서 http://127.0.0.1:6080/vnc.html?autoconnect=1&resize=scale
+# -> valley.town/login -> '다른 방법으로 로그인' -> '구글로 계속하기'
 ```
 
-Chrome 을 systemd 로 상시 기동(CDP 는 127.0.0.1 에만 바인딩)하고
-12시간마다 `auto_relogin.py` 를 돌린다. **1회 Google 로그인**은 SSH 터널로 한다:
+끝나면 임시 프로세스(Xvfb, Chrome, x0vncserver, websockify)를 모두 정리한다.
+Google 세션은 프로필 디스크에 남으므로 이후 타이머가 알아서 쓴다.
 
-```bash
-ssh -N -L 9222:127.0.0.1:9222 <user>@<EC2>
-# 로컬 Chrome 에서 chrome://inspect > Configure > localhost:9222 추가
-# Remote Target 의 [inspect] 로 원격 화면을 열어 로그인
-```
-
-데이터센터 IP 라 Google 이 추가 인증을 요구할 수 있다. 이 부분만 해보기 전엔 모른다.
+막힌 지점들:
+- `chrome://inspect` 의 자동 탐지는 동작하지 않았다. DevTools 직접 URL 도 DOM 이 안 떴다.
+  noVNC 가 유일하게 확실했다.
+- 로컬 브라우저의 MetaMask 확장이 noVNC 페이지에 끼어들어 에러창을 띄운다. 시크릿 창에서 열면 된다.
+- AL2023 에 `x11vnc` 는 없다. `tigervnc-server` 의 `x0vncserver` 를 쓴다.
+- PowerShell 에서 `--parameters '{"json"}'` 은 따옴표가 깨진다. `portNumber=6080,localPortNumber=6080` 축약형을 쓴다.
 
 **valley.town 의 동시접속 제한 여부도 미확인.**
 제한이 있다면 로컬 전용 창에서 valley.town 을 다시 쓸 때 서버 쪽 세션이 끊길 수 있다.

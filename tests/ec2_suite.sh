@@ -115,11 +115,11 @@ awk -v m="$MIN" 'BEGIN{exit !(m > 150)}' && ok "D6 메모리 안전(최저 ${MIN
 [ "$(pgrep -cf chrome-cdp-profile)" = "0" ] && ok "D7 잔여 없음" || ng "D7 잔류"
 
 sec "D'. 실제 재로그인 경로 (강제)"
-BEFORE_TOKEN=$(cookie | grep -oP '__Secure-nf.session-token=\K[^;]{0,20}')
-$R xvfb-run -a python3 auto_relogin.py valley.town --force \
+BEFORE_TOKEN=$(cookie | md5sum | cut -d" " -f1)
+sudo -u ec2-user AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-ap-northeast-2} MIRROR_FILE=$MIRROR xvfb-run -a python3 auto_relogin.py valley.town --force \
    --port 9477 --profile /home/ec2-user/.config/chrome-cdp-profile \
-   --store $PARAM_STORE 2>&1 | grep -vE "PythonDeprecation|warnings.warn" | tail -3
-AFTER_TOKEN=$(cookie | grep -oP '__Secure-nf.session-token=\K[^;]{0,20}')
+   --store $PARAM_STORE --mirror-file $MIRROR 2>&1 | grep -vE "PythonDeprecation|warnings.warn" | tail -3
+AFTER_TOKEN=$(cookie | md5sum | cut -d" " -f1)
 [ -n "$AFTER_TOKEN" ] && [ "$BEFORE_TOKEN" != "$AFTER_TOKEN" ] \
   && ok "D'1 OAuth 재로그인으로 새 토큰 발급" || ng "D'1 토큰이 그대로"
 [ "$(cat $MIRROR)" = "$(cookie)" ] && ok "D'2 미러도 새 값으로 갱신" || ng "D'2 미러 불일치"

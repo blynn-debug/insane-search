@@ -139,6 +139,9 @@ def main():
     ap.add_argument("--max-trust-days", type=float, default=7,
                     help="저장소 만료가 N일보다 멀면 틀어진 것으로 보고 "
                          "실제 값을 확인한다 (valley 세션은 최대 5일, 기본 7)")
+    ap.add_argument("--mirror-file", default=os.environ.get("MIRROR_FILE"),
+                    metavar="PATH",
+                    help="갱신 후 쿠키를 로컬 파일에도 쓴다(0600). AWS SDK 없는 봇용")
     ap.add_argument("--log-file")
     ap.add_argument("--shot-dir", default="", help="단계별 스크린샷을 남길 디렉터리")
     args = ap.parse_args()
@@ -306,9 +309,13 @@ def main():
         if not os.path.exists(tmp):
             log_line(args.log_file, "[X] 추출된 쿠키 파일이 없다")
             return 3
-        r = subprocess.run([sys.executable, "session_keeper.py", "push",
-                            "--store", args.store, "--from", tmp, "--require", TOKEN],
-                           cwd=here)
+        push = [sys.executable, "session_keeper.py", "push",
+                "--store", args.store, "--from", tmp, "--require", TOKEN]
+        # 미러 경로를 환경변수에만 의존하면 수동 실행 때 미러가 낡은 채 남는다.
+        # 명시적으로 넘긴다(값이 없으면 session_keeper 가 MIRROR_FILE 을 본다).
+        if args.mirror_file:
+            push += ["--mirror-file", args.mirror_file]
+        r = subprocess.run(push, cwd=here)
         try:
             os.remove(tmp)
         except OSError:

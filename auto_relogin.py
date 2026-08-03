@@ -111,9 +111,16 @@ def session_cookie(bws):
     return None
 
 
+def google_cookie(bws):
+    """Google 세션 쿠키(있으면 그 만료까지 함께)."""
+    for c in cdp_call(bws, "Storage.getCookies")["cookies"]:
+        if c["name"] == "__Secure-3PSID" and "google" in c["domain"]:
+            return c
+    return None
+
+
 def google_alive(bws):
-    return any(c["name"] == "__Secure-3PSID" and "google" in c["domain"]
-               for c in cdp_call(bws, "Storage.getCookies")["cookies"])
+    return google_cookie(bws) is not None
 
 
 def drop_session(tab, cookie):
@@ -191,6 +198,7 @@ def main():
         except Exception as e:
             log_line(args.log_file, f"[!] 저장소 만료 확인 실패({e}). Chrome 을 띄워 직접 확인한다")
 
+    google_exp = None      # Chrome 을 띄운 김에 알아낸 Google 세션 만료(있으면)
     proc = None
     if not port_open(args.port):
         proc = launch_chrome(find_chrome(), args.profile, args.port, "about:blank", show=False)
@@ -293,6 +301,13 @@ def main():
             with open(cookie_json, "w", encoding="utf-8") as f:
                 json.dump(jar, f, ensure_ascii=False)
             log_line(args.log_file, f"[o] 쿠키 {len(jar)}개 추출 (Chrome 종료 전)")
+
+            # Google 세션 만료도 같이 기록해둔다. 점검 에이전트가 Chrome 을 띄우지 않고도
+            # '언제 사람이 재로그인해야 하는지' 를 알 수 있어야 한다.
+            gc = google_cookie(bws)
+            if gc and gc.get("expires", 0) > 0:
+                google_exp = datetime.datetime.fromtimestamp(
+                    gc["expires"], datetime.timezone.utc).isoformat()
     finally:
         if tab:
             tab.close()
@@ -320,6 +335,20 @@ def main():
             os.remove(tmp)
         except OSError:
             pass
+
+        # push 가 메타를 새로 쓰므로 그 뒤에 Google 만료를 얹는다.
+        if r.returncode == 0 and google_exp:
+            try:
+                from session_keeper import meta_read, meta_write
+                m = meta_read(args.store)
+                if m.get("google_expires_at") != google_exp:
+                    m["google_expires_at"] = google_exp
+                    meta_write(args.store, m)
+                    days = (datetime.datetime.fromisoformat(google_exp)
+                            - datetime.datetime.now(datetime.timezone.utc)).days
+                    log_line(args.log_file, f"[o] Google 세션 잔여 {days}일 기록")
+            except Exception as e:
+                log_line(args.log_file, f"[!] Google 만료 기록 실패: {e}")
         return r.returncode
     return 0
 

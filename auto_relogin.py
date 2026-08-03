@@ -136,6 +136,9 @@ def main():
                     help="아직 안 죽었어도 새로 발급받는다")
     ap.add_argument("--renew-before", type=float, default=48,
                     help="만료 N시간 전이면 갱신한다 (기본 48)")
+    ap.add_argument("--max-trust-days", type=float, default=7,
+                    help="저장소 만료가 N일보다 멀면 틀어진 것으로 보고 "
+                         "실제 값을 확인한다 (valley 세션은 최대 5일, 기본 7)")
     ap.add_argument("--log-file")
     ap.add_argument("--shot-dir", default="", help="단계별 스크린샷을 남길 디렉터리")
     args = ap.parse_args()
@@ -150,7 +153,14 @@ def main():
             if exp_raw:
                 left = (datetime.datetime.fromisoformat(exp_raw)
                         - datetime.datetime.now(datetime.timezone.utc)).total_seconds() / 3600
-                if left > args.renew_before:
+                if left > args.max_trust_days * 24:
+                    # valley 세션은 발급 후 5일이 최대다. 그보다 긴 값은 메타가
+                    # 틀어진 것이므로 믿지 않고 Chrome 으로 실제 만료를 확인·교정한다.
+                    # (안 그러면 틀린 메타가 영영 안 고쳐지고 만료 경고도 안 나간다)
+                    log_line(args.log_file,
+                             f"[!] 저장소 만료가 비정상적으로 멀다({left/24:.0f}일). "
+                             "실제 값을 확인해 교정한다")
+                elif left > args.renew_before:
                     # 만료까지 여유가 있어도 실제로 살아있는지 한 번 확인한다.
                     # 메타만 믿으면, 서버가 세션을 조기 무효화했을 때 영영 못 알아챈다
                     # (전수 테스트에서 실제로 이 구멍이 드러났다).

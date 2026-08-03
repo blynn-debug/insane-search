@@ -62,7 +62,8 @@ echo "== 3/5 메모리 여유 확인"
 AVAIL=$(free -m | awk '/^Mem:/{print $7}')
 SWAP=$(free -m | awk '/^Swap:/{print $2}')
 echo "   사용가능 메모리 ${AVAIL}MB / 스왑 ${SWAP}MB"
-if [ "$AVAIL" -lt 900 ] && [ "$SWAP" -lt 2048 ]; then
+# 2GB 스왑을 free 는 2047MB 로 보고한다. 경계를 2048 로 두면 1MB 차이로 또 만들려 든다.
+if [ "$AVAIL" -lt 900 ] && [ "$SWAP" -lt 1900 ]; then
   # 기존 스왑은 절대 건드리지 않는다. 별도 파일을 추가로 붙인다.
   # (이전 버전은 기존 스왑을 먼저 지운 뒤 생성에 실패해 스왑이 0 이 된 적이 있다)
   if [ ! -f /swapfile2 ]; then

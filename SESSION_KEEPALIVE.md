@@ -191,6 +191,35 @@ AWS 데이터센터 IP(CloudShell)에서 동일 쿠키로 `200` 확인.
 Google 쿠키는 기기/IP 에 묶이고(`__Secure-3PSIDTS` 는 수십 분마다 회전),
 데이터센터 IP 에서의 로그인은 추가 인증·차단을 부른다. 서버에는 valley.town 쿠키만 둔다.
 
+## 점검 (테스트와 구분)
+
+**운영 중 점검은 `health_check.sh` 로 한다.** 읽기만 하고 아무것도 바꾸지 않는다.
+`valley-health.timer` 가 12시간마다(09,21시 UTC) 돌린다.
+재발급 타이머(03,15시)와 6시간 어긋나 있어, 갱신 직후가 아니라
+"갱신이 제때 됐는지" 를 보는 시점이 된다.
+
+보는 것: 타이머 활성 / 마지막 재발급 결과 / SSM 쿠키 존재 /
+**실제 인증 요청 200** / 세션 만료 잔여 / **Google 세션 잔여** /
+미러 파일 일치·권한 / 메모리·디스크 여유 / Chrome·Xvfb 존재.
+
+이상이 있으면 SNS 로 알리고 exit 1. 알림이 나가려면 EC2 역할에 권한이 필요하다:
+
+```bash
+aws iam put-role-policy --role-name valley-cookie-reader --policy-name valley-sns-publish \
+  --policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow",
+    "Action":"sns:Publish","Resource":"arn:aws:sns:ap-northeast-2:<계정ID>:valley-keepalive-alert"}]}'
+```
+
+수동 점검:
+
+```bash
+cd ~/insane-search && bash health_check.sh
+journalctl -u valley-health -n 40 --no-pager
+```
+
+**`tests/ec2_suite.sh` 는 점검용이 아니다.** SSM 을 일부러 망가뜨렸다 복구하는
+파괴적 테스트라 배포 검증 때만 수동으로 돌린다. 주기 실행에 걸면 안 된다.
+
 ## 생존 판정 방식
 
 `https://www.valley.town/newsroom` 응답으로 판단한다.
@@ -242,7 +271,8 @@ EC2 에 Chrome 을 올리고 Google 로그인을 1회만 해두면 로컬 PC 와
 
 | 항목 | 값 |
 |---|---|
-| systemd 타이머 | `valley-relogin.timer` — 매일 03,15시 UTC |
+| systemd 타이머 | `valley-relogin.timer` — 매일 03,15시 UTC (재발급) |
+| 점검 타이머 | `valley-health.timer` — 매일 09,21시 UTC (비파괴 점검) |
 | 서비스 | `valley-relogin.service` — `xvfb-run` 으로 감싸 실행 |
 | 프로필 | `/home/ec2-user/.config/chrome-cdp-profile` |
 | 저장소 | `ssm:/valley/session` |

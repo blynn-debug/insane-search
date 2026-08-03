@@ -94,8 +94,11 @@ python3 session_keeper.py push --store ssm:/valley/session --from cookies.json
 현재 상태 확인:
 
 ```bash
-aws ssm get-parameter --name /valley/session-expiry --query Parameter.Value --output text
+aws ssm get-parameter --name /valley/session-expiry --with-decryption --query Parameter.Value --output text
 ```
+
+`--with-decryption` 을 빠뜨리면 SecureString 암호문(base64 덩어리)이 그대로 나온다.
+쿠키 조회도 마찬가지다.
 
 ## 새 컴퓨터에서 시작할 때
 

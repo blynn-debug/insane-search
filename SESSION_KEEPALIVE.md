@@ -210,9 +210,47 @@ exit 3 으로 죽는다(낡은 쿠키를 빈 값으로 날리지 않기 위해).
 세션 쿠키를 재발급하지 않고, 세션 재발급용 엔드포인트도 없다
 (`/api/auth/session`, `/api/auth/csrf` 등 후보 7개 전부 404).
 
-**결론: 세션은 발급 후 5일 고정이고, HTTP 로 연장할 방법이 없다.**
-5일마다 사람이 재로그인해야 한다. keepalive 의 역할은 "유지"가 아니라
-**만료 감지와 48시간 전 사전 경고**다.
+**세션은 발급 후 5일 고정이고, HTTP 로 연장할 방법이 없다.**
+
+### 다만 재발급은 자동화된다 (2026-08-03 확인)
+
+만료되는 건 valley 세션(5일)이지 **Google 세션(수개월)이 아니다.**
+전용 프로필의 Google 세션이 살아 있으면 OAuth 를 다시 타는 것만으로
+비밀번호·2FA 없이 새 세션이 나온다. 실측: 클릭 2번, 4초.
+
+```
+/login -> '다른 방법으로 로그인' -> '구글로 계속하기' -> 새 세션 (5일)
+```
+
+`auto_relogin.py` 가 이걸 자동으로 한다:
+
+```bash
+py -3.14 auto_relogin.py valley.town --store ssm:/valley/session
+#   만료 48시간 이내일 때만 갱신한다(--force 로 강제)
+```
+
+- Google 세션까지 죽으면 **exit 4**. 이때만 사람이 `relogin.py` 로 로그인한다.
+- 페이지 문구가 바뀌면 **exit 5** + 스크린샷(`--shot-dir`). 조용히 실패하지 않는다.
+- 버튼은 화면 문구로 찾는다(`MORE_RE`, `IDP_RE`). 사이트가 문구를 바꾸면 거기만 고친다.
+
+### 24/7 무인 운영 (구조 B)
+
+로컬 PC 없이 돌리려면 EC2 에 Chrome 을 올리고 Google 로그인을 1회만 해둔다.
+
+```bash
+bash ec2_setup.sh --cron
+```
+
+Chrome 을 systemd 로 상시 기동(CDP 는 127.0.0.1 에만 바인딩)하고
+12시간마다 `auto_relogin.py` 를 돌린다. **1회 Google 로그인**은 SSH 터널로 한다:
+
+```bash
+ssh -N -L 9222:127.0.0.1:9222 <user>@<EC2>
+# 로컬 Chrome 에서 chrome://inspect > Configure > localhost:9222 추가
+# Remote Target 의 [inspect] 로 원격 화면을 열어 로그인
+```
+
+데이터센터 IP 라 Google 이 추가 인증을 요구할 수 있다. 이 부분만 해보기 전엔 모른다.
 
 **valley.town 의 동시접속 제한 여부도 미확인.**
 제한이 있다면 로컬 전용 창에서 valley.town 을 다시 쓸 때 서버 쪽 세션이 끊길 수 있다.

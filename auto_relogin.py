@@ -1,0 +1,233 @@
+# -*- coding: utf-8 -*-
+"""사람 개입 없이 valley.town 세션을 재발급받는다.
+
+전용 Chrome 프로필의 Google 세션은 수개월 유지되는 반면 valley.town 세션은 5일이다.
+그래서 만료된 valley 세션만 Google OAuth 로 다시 받아오면 된다.
+실측(2026-08-03): /login -> '다른 방법으로 로그인' -> '구글로 계속하기' 클릭 두 번으로
+비밀번호·2FA 없이 4초 만에 새 세션이 발급됐다.
+
+    py -3.14 auto_relogin.py valley.town --store ssm:/valley/session
+
+Google 세션까지 죽으면 이 스크립트로는 복구할 수 없다(사람이 로그인해야 한다).
+그 경우 exit 4 로 끝나며, relogin.py 로 수동 로그인해야 한다.
+"""
+import argparse
+import base64
+import json
+import os
+import subprocess
+import sys
+import time
+import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from browser_cookies import (  # noqa: E402
+    DEFAULT_PROFILE, cdp_call, find_chrome, launch_chrome, log_line,
+    match_domain, port_open, wait_for_cdp,
+)
+
+TOKEN = "__Secure-nf.session-token"
+# 화면 문구로 버튼을 찾는다. 사이트가 문구를 바꾸면 여기만 고치면 된다.
+MORE_RE = r"다른 방법|다른방법|other"
+IDP_RE = r"google|구글"
+
+
+def http(port, path, method="GET"):
+    req = urllib.request.Request(f"http://127.0.0.1:{port}{path}", method=method)
+    with urllib.request.urlopen(req, timeout=15) as r:
+        body = r.read().decode("utf-8", "replace")
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError:
+        return body
+
+
+class Tab:
+    """페이지 타깃 하나를 열고 CDP 로 조작한다."""
+
+    def __init__(self, port):
+        self.port = port
+        t = http(port, "/json/new?about:blank", method="PUT")
+        self.id = t["id"]
+        from websocket import create_connection
+        self.ws = create_connection(t["webSocketDebuggerUrl"], timeout=90,
+                                    max_size=64 * 1024 * 1024, suppress_origin=True)
+        self.n = 0
+
+    def send(self, method, params=None):
+        self.n += 1
+        self.ws.send(json.dumps({"id": self.n, "method": method, "params": params or {}}))
+        while True:
+            m = json.loads(self.ws.recv())
+            if m.get("id") == self.n:
+                if "error" in m:
+                    raise RuntimeError(f"{method}: {m['error']}")
+                return m.get("result", {})
+
+    def js(self, expr):
+        return self.send("Runtime.evaluate", {
+            "expression": expr, "returnByValue": True, "awaitPromise": True
+        }).get("result", {}).get("value")
+
+    def click_by_text(self, pattern):
+        """보이는 버튼/링크 중 문구가 맞는 첫 요소를 클릭한다."""
+        return self.js("""
+          (() => {
+            const re = new RegExp(%s, 'i');
+            const els = Array.from(document.querySelectorAll('button,a[href],[role=button]'))
+              .filter(e => e.offsetParent !== null);
+            const e = els.find(x => re.test(x.innerText || '') ||
+                                    re.test(x.getAttribute('href') || ''));
+            if (!e) return false;
+            e.click();
+            return true;
+          })()
+        """ % json.dumps(pattern))
+
+    def shot(self, path):
+        try:
+            data = self.send("Page.captureScreenshot", {"format": "png"})["data"]
+            with open(path, "wb") as f:
+                f.write(base64.b64decode(data))
+            return path
+        except Exception:
+            return None
+
+    def close(self):
+        try:
+            self.ws.close()
+        finally:
+            try:
+                http(self.port, f"/json/close/{self.id}")
+            except Exception:
+                pass
+
+
+def session_cookie(bws):
+    for c in cdp_call(bws, "Storage.getCookies")["cookies"]:
+        if c["name"] == TOKEN:
+            return c
+    return None
+
+
+def google_alive(bws):
+    return any(c["name"] == "__Secure-3PSID" and "google" in c["domain"]
+               for c in cdp_call(bws, "Storage.getCookies")["cookies"])
+
+
+def drop_session(tab, cookie):
+    """만료 임박한 세션만 지운다. url 이 아니라 정확한 domain+path 를 줘야 지워진다."""
+    tab.send("Network.enable")
+    tab.send("Network.deleteCookies",
+             {"name": TOKEN, "domain": cookie["domain"], "path": cookie.get("path", "/")})
+
+
+def main():
+    ap = argparse.ArgumentParser(description="무개입 세션 재발급", allow_abbrev=False)
+    ap.add_argument("domain", nargs="?", default="valley.town")
+    ap.add_argument("--store", default="", help="지정하면 성공 후 session_keeper push 까지 한다")
+    ap.add_argument("--profile", default=DEFAULT_PROFILE)
+    ap.add_argument("--port", type=int, default=9222)
+    ap.add_argument("--login-url", default="https://www.valley.town/login")
+    ap.add_argument("--force", action="store_true",
+                    help="아직 안 죽었어도 새로 발급받는다")
+    ap.add_argument("--renew-before", type=float, default=48,
+                    help="만료 N시간 전이면 갱신한다 (기본 48)")
+    ap.add_argument("--log-file")
+    ap.add_argument("--shot-dir", default="", help="단계별 스크린샷을 남길 디렉터리")
+    args = ap.parse_args()
+
+    proc = None
+    if not port_open(args.port):
+        proc = launch_chrome(find_chrome(), args.profile, args.port, "about:blank", show=False)
+        wait_for_cdp(args.port)
+        time.sleep(3)
+
+    tab = None
+    try:
+        bws = http(args.port, "/json/version")["webSocketDebuggerUrl"]
+        if not google_alive(bws):
+            log_line(args.log_file,
+                     "[X] Google 세션이 없다. 자동 재발급 불가 - relogin.py 로 사람이 로그인해야 한다.")
+            return 4
+
+        cur = session_cookie(bws)
+        if cur and not args.force:
+            left = (cur.get("expires", 0) - time.time()) / 3600
+            if left > args.renew_before:
+                log_line(args.log_file,
+                         f"[o] 아직 {left/24:.1f}일 남았다. 갱신 불필요 (--force 로 강제 가능)")
+                return 0
+
+        tab = Tab(args.port)
+        tab.send("Page.enable")
+        if cur:
+            drop_session(tab, cur)
+
+        tab.send("Page.navigate", {"url": args.login_url})
+        time.sleep(6)
+        if args.shot_dir:
+            tab.shot(os.path.join(args.shot_dir, "1_login.png"))
+
+        # Google 버튼이 처음부터 보이면 그대로, 아니면 '다른 방법으로 로그인' 을 편다.
+        if not tab.click_by_text(IDP_RE):
+            if not tab.click_by_text(MORE_RE):
+                log_line(args.log_file, "[X] '다른 방법으로 로그인' 을 못 찾았다. 페이지 구조가 바뀌었다.")
+                if args.shot_dir:
+                    tab.shot(os.path.join(args.shot_dir, "err_no_more.png"))
+                return 5
+            time.sleep(2.5)
+            if not tab.click_by_text(IDP_RE):
+                log_line(args.log_file, "[X] '구글로 계속하기' 를 못 찾았다. 페이지 구조가 바뀌었다.")
+                if args.shot_dir:
+                    tab.shot(os.path.join(args.shot_dir, "err_no_idp.png"))
+                return 5
+
+        for i in range(12):
+            time.sleep(2.5)
+            if session_cookie(bws):
+                break
+        got = session_cookie(bws)
+        if args.shot_dir:
+            tab.shot(os.path.join(args.shot_dir, "2_after.png"))
+
+        if not got:
+            log_line(args.log_file,
+                     f"[X] 30초 안에 세션이 안 나왔다. URL={tab.js('location.href')} "
+                     "Google 이 재인증을 요구했을 수 있다 - 사람이 확인해야 한다.")
+            return 4
+
+        left = (got.get("expires", 0) - time.time()) / 86400
+        log_line(args.log_file, f"[o] 새 세션 발급 완료 ({left:.1f}일짜리)")
+    finally:
+        if tab:
+            tab.close()
+        if proc:
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                               capture_output=True)
+            else:
+                proc.terminate()
+
+    if args.store:
+        here = os.path.dirname(os.path.abspath(__file__))
+        tmp = os.path.join(here, "_auto_cookies.json")
+        r = subprocess.run([sys.executable, "browser_cookies.py", args.domain,
+                            "--format", "json", "-o", tmp, "--require", TOKEN,
+                            "--port", str(args.port)], cwd=here)
+        if r.returncode != 0:
+            log_line(args.log_file, "[X] 쿠키 추출 실패")
+            return 3
+        r = subprocess.run([sys.executable, "session_keeper.py", "push",
+                            "--store", args.store, "--from", tmp, "--require", TOKEN],
+                           cwd=here)
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        return r.returncode
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

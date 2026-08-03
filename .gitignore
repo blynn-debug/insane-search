@@ -47,3 +47,4 @@ scratchpad/
 
 # GitHub 100MB/file hard limit — source PDFs kept local only
 lecture_reference/src/*.pdf
+_auto_cookies.json

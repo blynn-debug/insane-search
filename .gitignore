@@ -48,3 +48,9 @@ scratchpad/
 # GitHub 100MB/file hard limit — source PDFs kept local only
 lecture_reference/src/*.pdf
 _auto_cookies.json
+# Runtime observation logs
+observations/
+
+# Generated scraper-forge recon dumps — only curated recipe.yaml is tracked
+recipes/*/miner-report.json
+recipes/*/network.json

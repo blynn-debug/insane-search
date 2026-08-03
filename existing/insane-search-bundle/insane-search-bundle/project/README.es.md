@@ -103,6 +103,10 @@ insane-search es un **lector de contenido público**, no una forma de saltarse l
 - Nunca inicia sesión por ti y nunca almacena ni transmite credenciales.
 - Todas las rutas usan endpoints públicos sin autenticación y técnicas estándar y documentadas.
 
+## Licencia
+
+MIT
+
 ---
 
 <div align="center">

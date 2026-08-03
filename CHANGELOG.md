@@ -1,5 +1,155 @@
 # Changelog
 
+## 0.13.0 — 2026-07-29
+
+Added — Threads 영상 라우트 (Phase 0).
+
+- yt-dlp에 익스트랙터가 없어 media 경로로 커버 불가하던 Threads(threads.com/threads.net) 영상 포스트를 Phase 0 라우터가 직접 처리: curl_cffi safari 지문 익명 GET → 인라인 JSON에서 URL shortcode(`"code":"…"`) 최근접 `video_versions` 블록 선택(페이지에 관련 포스트 영상 블록이 다수 혼재하므로 필수) → `\/`·유니코드 이스케이프 해제 → 서명 CDN URL 목록을 `{"post_code","video_urls"}` JSON으로 반환. 다운로드는 engine 밖 — 서명 URL은 plain curl로 충분(실측: h264+AAC progressive).
+- 영상 없는 포스트·프로필 URL은 ok=False로 일반 체인 폴백 — 라우트가 콘텐츠 종류를 삼키지 않는다.
+- `tests/coverage_battery.py`에 threads 케이스 추가, SKILL.md/PLATFORMS.md/references/media.md 문서화(서명 URL 만료·DASH-only·캐러셀 미검증 경계 포함).
+
+## 0.12.1 — 2026-07-23
+
+Fixed — 429 대응·브라우저 예산 (검증 리서치 후속).
+
+- 429(rate-limit)가 TLS 그리드를 멈추는 것을 넘어 브라우저 폴백까지 차단하던 결함 수정 — TERMINAL 셋의 "그리드 중단"과 "벽(브라우저도 무익)" 역할을 분리(`_BROWSER_FUTILE_VALUES`=auth/404). 429 중단 시에도 브라우저 폴백과 R6 백오프 안내가 살아있다.
+- Playwright MCP 스텁(파이썬에서 실행 불가 안내용)이 브라우저 예산(max_browser_attempts=2)을 소진해 cloudflare_turnstile 프로필에서 실제 Chrome 폴백이 굶던 결함 수정 — 스텁은 attempts에 기록만 하고 예산은 소비하지 않음.
+- 회귀 테스트 `engine/tests/test_t7_browser_gate.py` 5종 추가(오프라인 모킹): 429→브라우저 진행 / 404→스킵 / 스텁 예산 무소비·실행 순서 / 예산 상한 유지 / 스텁 무동작.
+
+## 0.12.0 — 2026-07-23
+
+Adaptive-access engine improvements (verified before/after: 9/14 → 12/14 on a 14-site live bench). Additive to the 0.11.0 content-quality / retry / rescue work.
+
+- **Validator false-positive fixes**: challenge markers now use identifier-boundary matching (a feature-flag token ending in `captcha` is no longer a challenge); CF interstitial structural markers (`window._cf_chl_opt`, `orchestrate/chl_page`) are decisive at any body size; a single SOFT marker inside a large body (>20KB) is treated as a content mention, not a block.
+- **curl_cffi runtime target filter**: TLS impersonate candidates are intersected with the installed curl_cffi's supported set, so version skew never wastes attempts; profile `tls_impersonate_avoid` keeps empirical blacklists only.
+- **Protocol-stealth fallback**: new `protocol_stealth_chrome` executor drives nodriver (raw CDP, no Playwright shim) then patchright (channel=chrome) for gates that fingerprint the automation protocol; import-guarded, opt-in auto-install.
+- **New WAF profiles**: `kasada_ips`, `imperva_incapsula`; `needs_protocol_stealth` added to Akamai/Cloudflare/DataDome/PerimeterX.
+- **Scraper forge**: `scripts/endpoint_miner.py` (static API mining) + `engine/templates/network_capture_patchright.py` (dynamic XHR capture) + `engine/recipe_loader.py` + `recipes/<domain>/recipe.yaml`. Recipes are consulted before the grid (Phase 0.5); a page-URL rewrite maps a blocked HTML page to its open JSON API.
+- **Observations log**: every fetch outcome appended to `observations/*.jsonl` for profile tuning (route learning remains in `learning.py`).
+- **auto-forge (opt-in, `INSANE_AUTO_FORGE=1`)**: when the chain gives up, render once, capture XHR/fetch traffic, pick the endpoint whose JSON most overlaps the rendered page text (ad/telemetry endpoints denied), confirm it replays with plain curl, return that JSON and auto-write a recipe. Multi-domain test: correctly finds the content API on JS-app sites (Naver/Musinsa/11st/dev.to/Clien) and returns no-content on server-rendered pages (HN/Reddit/SO) instead of grabbing an ad blob.
+
+## 0.11.0 — 2026-07-23
+
+Content-quality + diagnosis upgrades (research P0 batch). All new libraries are
+optional with graceful degradation — the engine still runs (raw fallback) when
+they are absent. No public-API break; `content` becomes markdown by default on
+the raw-HTML success path (opt out with `--no-markdown` / `enable_markdown=False`).
+
+- **markdownify (MIT), default ON**: a raw-HTML success is converted to
+  structure-preserving markdown (tables → pipe tables, `<pre>/<code>` → fenced
+  blocks; script/style/head noise stripped first). `extraction_source` becomes
+  `raw+md`. The engine's consumers are usually agents feeding an LLM, so clean
+  markdown is the natural default; `enable_markdown=False` restores raw HTML.
+  markdownify is now in the base dependency auto-install guard.
+- **resiliparse (Apache-2.0) main-content extraction, opt-in**
+  (`--maincontent` / `enable_maincontent=True`): strips nav/footer/sidebar/ads
+  to the article body (`extraction_source=maincontent`), wins over markdown when
+  both are on. Opt-in because it can over-trim non-article pages; rejects a
+  near-empty extraction and keeps raw.
+- **pdfplumber (MIT) PDF extraction, automatic**: `_extract_pdf` tries
+  pdfplumber first (better multi-column / table handling) and falls back to
+  pypdf. `pymupdf4llm` / `PyMuPDF` are AGPL and are intentionally NOT used.
+- **Differential block classification**: on failure, `_classify_block` compares
+  the outcomes of the routes already tried and sets `FetchResult.block_class` —
+  `bot_detection` (routes disagree or a WAF/challenge signal → escalation may
+  help) vs `infra_or_auth` (every route uniformly 401/404 → stealth can't help).
+  Additive JSON field; no new dependency. (Idea: Bamberg arXiv:2606.14525 §5.3.)
+- Tests: +25 (test_t3_markdown 8, test_t4_maincontent 5, test_t5_pdfplumber 6,
+  test_t6_differential 7 — network-free); full engine suite green, live e2e +
+  all-libraries-blocked graceful degradation verified.
+
+## 0.10.1 — 2026-07-22
+
+Parser-input ceilings for the v0.10.0 content-rescue paths (hardening
+requested in downstream security review — every byte reaching a rescue
+parser is attacker controlled):
+
+- **`_SCAN_LIMIT` (2M chars)**: rescue regexes (title / visible-text /
+  JSON-LD discovery) only ever scan a bounded prefix of the body; the raw
+  `content` surface still carries the full text (that contract predates
+  the chain).
+- **JSON-LD**: at most 10 `ld+json` blocks parsed per page, blobs over
+  200K chars are skipped before `json.loads`, joined output capped at 1M.
+- **PDF**: bodies over 25MB are rejected before `PdfReader` ever sees them
+  (`pdf_too_large`) — decompression bombs are bounded at their input, not
+  their page count; extracted text capped at 1M chars (80-page cap kept).
+- **innerText**: capped at 1M chars twice — at the executor's envelope
+  parse boundary and again before the render-merge gate.
+- Regression tests at every ceiling: 7 new in `test_t2_rescue.py`
+  (block count / blob size / output cap / scan window / pdf-too-large /
+  pdf text cap / innerText cap) + 1 in `test_u4.py` (envelope boundary).
+  Suite 91 green; live E2E battery unchanged (ordinary-path overhead
+  still ≈0.2ms).
+
+## 0.10.0 — 2026-07-22
+
+Takeover of the four accepted items from PR #8 (@miter37) — transient-status
+retry, PDF extraction, JSON-LD rescue, Playwright render-merge — with the
+review fixes applied. The rejected parts of the PR (JS_SHELL / BOT_WALL
+verdicts, trafilatura extraction chain, body size cap, cookie-banner removal,
+resource blocking) are NOT included; verdict-system changes land with the
+upstream validator/scheduler rework instead.
+
+- **`engine/transport.py`**: `POOL.request(max_retries=N)` retries transient
+  statuses (429/502/503/504) on the SAME identity with exponential backoff
+  (1.5s × 2^n). Review fixes over the PR version: a numeric `Retry-After`
+  header overrides the backoff delay, total retry sleep is capped at 10s, and
+  the default is `max_retries=0` so only opted-in callers retry.
+- **`engine/fetch_chain.py`**: retry fires on the PROBE attempt only — grid
+  candidates never retry, so a failing grid cannot multiply backoff sleeps
+  into a tens-of-seconds failure path (the amplification flagged in review).
+- **`engine/fetch_chain.py`**: content-rescue extraction. The raw body REMAINS
+  `content` for ordinary HTML successes (no contract break); a rescue replaces
+  it only where the raw body is unusable: PDF bodies (magic-byte sniff +
+  content-type, `.pdf`-URL-serving-HTML re-guarded) → pypdf text; SPA shells
+  whose visible text is thinner than their JSON-LD articleBody → articleBody.
+  The "rescue must beat the visible text" gate is the structural fix for the
+  teaser-beats-article failure mode found in the PR's meta fallback. New
+  `FetchResult.extraction_quality/source/meta` fields; `--no-extract` /
+  `enable_extraction=False` to disable.
+- **Render-merge**: both Playwright templates emit `innerText` in the JSON
+  envelope; the executor stashes it and the rescue gate keeps whichever of
+  (visible body text, innerText) carries more text. Compared against VISIBLE
+  text length, not raw markup length. The PR's stylesheet/resource blocking
+  and cookie-banner DOM removal are excluded (stealth-fingerprint conflict).
+- **`engine/__main__.py`**: new `--no-retry` / `--no-extract` flags.
+- **SKILL.md**: content contract documented; `pypdf` added to the dependency
+  auto-install guard.
+- Tests: `test_t1_retry.py` (8) + `test_t2_rescue.py` (11) added,
+  `test_u4.py` envelope tests extended; full suite 83 green.
+
+## 0.9.2 — 2026-07-15
+
+Cross-platform yt-dlp invocation — the YouTube / media route no longer
+misreports an installed yt-dlp as missing.
+
+- **`engine/phase0.py`**: the YouTube Phase-0 route invoked yt-dlp only as the
+  bare `yt-dlp` console script. With `pip install --user` and on Windows / venv
+  installs the script dir is commonly absent from PATH, so `subprocess.run`
+  raised `FileNotFoundError` and the route reported `"yt-dlp not installed"`
+  even though yt-dlp *was* installed and importable — silently disabling the
+  headline media route (1,858 sites) for those users. New `_ytdlp_argv()`
+  prefers the `yt-dlp` console script on PATH and falls back to
+  `<python> -m yt_dlp`, mirroring the `which yt-dlp || python3 -m yt_dlp`
+  fallback already documented in `references/media.md`. Non-regressive:
+  environments with `yt-dlp` on PATH are unchanged.
+- **`tests/coverage_battery.py`**: the youtube battery uses the same resolution.
+- **`engine/bias_check.py`**: the `EXPLICIT_ALLOW_FILES` exemption compared
+  `str(rel)`, which is backslash-separated on Windows and therefore never
+  matched the POSIX-style allow-list — so the sanctioned `phase0.py` exemption
+  silently failed and the No-Site-Name gate reported false positives when run
+  on Windows. Now compares `rel.as_posix()`. Same theme (cross-platform); no
+  behaviour change on POSIX.
+- Adds network-free regression tests in `engine/tests/test_u9.py`.
+
+## 0.9.1 — 2026-07-02
+
+Activate the Patchright fallback and align the self-learning host key.
+
+- **Patchright activated** (`engine/templates/package.json`): added `patchright` (^1.61.1) as a dependency. The real-Chrome template (`playwright_real_chrome.js`) already *preferred* `require('patchright')`, but the package was never declared, so it always fell back to playwright-extra+stealth. Patchright is a Playwright-API-compatible drop-in fork that patches the CDP `Runtime.enable` (console-attach) leak that Cloudflare/DataDome-class detection now keys on — verified end-to-end (`automation:patchright`, HTTP 200, real HTML). When patchright is absent the template still falls back to playwright-extra+stealth → plain playwright, all on `channel:'chrome'`.
+- **Learning host-key fix** (`engine/learning.py`): `key_for` used `urlsplit().netloc` (keeps port + userinfo) while the session pool and Playwright profile dir key on `hostname` (`transport._host_of`, `executor._profile_dir_for`). A URL with a port therefore *learned* under a different key than it *fetched* under. Switched to `hostname` so the learned route, warm session, and browser profile all share one host key.
+- **Docs**: `SKILL.md` + `references/playwright.md` install instructions updated to the local `engine/templates` npm install with `npx patchright install chrome`.
+- Full engine regression 59/59; `bias_check` clean.
 ## 0.9.0 — 2026-06-28
 
 Prompt-injection surface hardening for fetched public web content.

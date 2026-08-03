@@ -324,7 +324,21 @@ def cmd_push(args):
 
     if args.require and args.require not in jar:
         raise SystemExit(f"[X] {src} 에 {args.require} 가 없다. 로그인부터 해라.")
-    store_write(args.store, to_cookie_header(jar))
+    header = to_cookie_header(jar)
+    store_write(args.store, header)
+
+    # 봇이 AWS SDK 없이도 읽을 수 있게 로컬에도 남긴다.
+    # 세션 토큰이 든 파일이므로 소유자만 읽게 한다.
+    if args.mirror_file:
+        d = os.path.dirname(os.path.abspath(args.mirror_file))
+        os.makedirs(d, exist_ok=True)
+        with open(args.mirror_file, "w", encoding="utf-8", newline="\n") as f:
+            f.write(header + "\n")
+        try:
+            os.chmod(args.mirror_file, 0o600)
+        except OSError:
+            pass
+        log(f"[o] 로컬 미러: {args.mirror_file} (0600)")
 
     if expiry:
         meta_write(args.store, {"expires_at": expiry.isoformat()})
@@ -376,6 +390,10 @@ def build_parser():
     ap.add_argument("--require", default=os.environ.get("REQUIRE_COOKIE", "__Secure-nf.session-token"),
                     help="반드시 있어야 하는 쿠키 이름")
     ap.add_argument("--sns-topic", help="세션 만료 시 알릴 SNS Topic ARN")
+    ap.add_argument("--mirror-file", default=os.environ.get("MIRROR_FILE"),
+                    metavar="PATH",
+                    help="push 시 쿠키를 로컬 파일에도 쓴다(0600). "
+                         "AWS SDK 없이 읽어야 하는 봇용")
     ap.add_argument("--warn-hours", type=float,
                     default=float(os.environ.get("WARN_HOURS", "48")),
                     help="만료 N시간 전에 미리 알린다 (기본 48). 재로그인은 사람이 해야 하므로 "

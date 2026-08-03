@@ -56,45 +56,25 @@ else
     https://github.com/blynn-debug/insane-search.git "$REPO_DIR"
 fi
 
-echo "== 3/5 Chrome 상시 기동 (systemd, CDP 는 localhost 에만 연다)"
-mkdir -p "$PROFILE"
-sudo tee /etc/systemd/system/valley-chrome.service >/dev/null <<EOF
-[Unit]
-Description=Chrome with CDP for valley session
-After=network-online.target
-
-[Service]
-User=$USER
-# --headless=new 는 Google 로그인에서 막힐 수 있어 쓰지 않는다.
-# 화면이 없으므로 가상 디스플레이 대신 오프스크린 창으로 띄운다.
-ExecStart=/usr/bin/google-chrome \\
-  --remote-debugging-port=$PORT \\
-  --remote-debugging-address=127.0.0.1 \\
-  --user-data-dir=$PROFILE \\
-  --no-first-run --no-default-browser-check \\
-  --disable-gpu --no-sandbox \\
-  --window-position=-32000,-32000 --window-size=1280,900 \\
-  --disable-background-networking \\
-  about:blank
-Restart=always
-RestartSec=5
-Environment=DISPLAY=
-
-[Install]
-WantedBy=multi-user.target
-EOF
-sudo systemctl daemon-reload
-sudo systemctl enable --now valley-chrome.service
-sleep 5
-if curl -sf "http://127.0.0.1:$PORT/json/version" >/dev/null; then
-  echo "   CDP $PORT 응답 OK"
-else
-  echo "!! CDP 가 안 열렸다:  sudo journalctl -u valley-chrome -n 50" >&2; exit 1
+echo "== 3/5 메모리 여유 확인"
+# Chrome 을 상시 기동하지 않는다. 여유 메모리가 적은 인스턴스에서 24/7 로 띄우면
+# 기존 프로세스가 OOM 으로 죽을 수 있다. auto_relogin.py 가 필요할 때만 띄우고 정리한다.
+AVAIL=$(free -m | awk '/^Mem:/{print $7}')
+SWAP=$(free -m | awk '/^Swap:/{print $2}')
+echo "   사용가능 메모리 ${AVAIL}MB / 스왑 ${SWAP}MB"
+if [ "$AVAIL" -lt 900 ] && [ "$SWAP" -lt 2048 ]; then
+  echo "   여유가 빠듯하다. 스왑을 2GB 로 늘린다."
+  if [ -f /swapfile ]; then sudo swapoff /swapfile && sudo rm -f /swapfile; fi
+  sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none
+  sudo chmod 600 /swapfile && sudo mkswap -q /swapfile && sudo swapon /swapfile
+  grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+  echo "   스왑 확장 완료: $(free -m | awk '/^Swap:/{print $2}')MB"
 fi
+mkdir -p "$PROFILE"
 
-echo "== 4/5 상태 확인"
+echo "== 4/5 상태 확인 (Chrome 은 갱신이 필요할 때만 뜬다)"
 cd "$REPO_DIR"
-$PYBIN auto_relogin.py valley.town --port "$PORT" --profile "$PROFILE" || true
+$PYBIN auto_relogin.py valley.town --port "$PORT" --profile "$PROFILE" --store "$STORE" || true
 
 if [ "${1:-}" = "--cron" ]; then
   echo "== 5/5 cron 등록 (12시간마다)"
@@ -110,13 +90,27 @@ cat <<'MSG'
 ────────────────────────────────────────────────────────
 1회 Google 로그인 (이것만 사람이 한다)
 
-로컬 PC 에서 SSH 터널을 연다:
+EC2 에서 Chrome 을 잠깐 띄워둔다(로그인하는 동안만):
 
-    ssh -N -L 9222:127.0.0.1:9222 <user>@<EC2 주소>
+    cd ~/insane-search
+    google-chrome --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 \
+      --user-data-dir=$HOME/.config/chrome-cdp-profile --no-first-run \
+      --no-default-browser-check --disable-gpu --no-sandbox \
+      --disable-dev-shm-usage --window-position=-32000,-32000 about:blank &
+
+로컬 PC 에서 터널을 연다. SSH 키가 없으면 SSM 으로 열 수 있다:
+
+    aws ssm start-session --target <인스턴스ID> \
+      --document-name AWS-StartPortForwardingSession \
+      --parameters '{"portNumber":["9222"],"localPortNumber":["9333"]}'
+
+    # 키가 있으면 SSH 로도 된다
+    ssh -i 키.pem -N -L 9333:127.0.0.1:9222 ec2-user@<EC2 주소>
 
 로컬 Chrome 에서 chrome://inspect 를 열고
-  Configure... > localhost:9222 추가 > 잠시 뒤 Remote Target 에 나타남
+  Configure... > localhost:9333 추가 > 잠시 뒤 Remote Target 에 나타남
   about:blank 옆 [inspect] 클릭 -> 원격 브라우저 화면이 열린다
+  (로컬 Chrome 도 9222 를 쓰므로 9333 을 써야 헷갈리지 않는다)
 
 그 화면에서 https://www.valley.town/login 으로 이동해
 Google 로그인을 끝낸다. (데이터센터 IP 라 추가 인증을 요구할 수 있다)

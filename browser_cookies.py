@@ -98,6 +98,11 @@ def launch_chrome(chrome, profile, port, url, show):
         "--no-default-browser-check",
         "--disable-background-networking",
         "--disable-features=Translate,OptimizationHints",
+        # 메모리가 빠듯한 서버(t3.small 등)를 위한 절약 옵션.
+        # /dev/shm 이 작은 환경에서 Chrome 이 죽는 걸 막는다.
+        "--disable-dev-shm-usage",
+        "--disable-extensions",
+        "--renderer-process-limit=2",
     ]
     if not show:
         # 창을 화면 밖으로 보내 눈에 안 띄게 한다. headless 는 로그인 세션 재사용이

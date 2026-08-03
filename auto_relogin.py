@@ -13,6 +13,7 @@ Google 세션까지 죽으면 이 스크립트로는 복구할 수 없다(사람
 """
 import argparse
 import base64
+import datetime
 import json
 import os
 import subprocess
@@ -136,6 +137,23 @@ def main():
     ap.add_argument("--log-file")
     ap.add_argument("--shot-dir", default="", help="단계별 스크린샷을 남길 디렉터리")
     args = ap.parse_args()
+
+    # 저장소에 기록된 만료를 먼저 본다. 아직 여유가 있으면 Chrome 을 아예 띄우지 않는다.
+    # 메모리가 빠듯한 서버(t3.small 등)에서 12시간마다 Chrome 을 띄우는 건 낭비이자 위험이다.
+    if args.store and not args.force:
+        try:
+            from session_keeper import meta_read
+            exp_raw = meta_read(args.store).get("expires_at")
+            if exp_raw:
+                left = (datetime.datetime.fromisoformat(exp_raw)
+                        - datetime.datetime.now(datetime.timezone.utc)).total_seconds() / 3600
+                if left > args.renew_before:
+                    log_line(args.log_file,
+                             f"[o] 만료까지 {left/24:.1f}일. 갱신 불필요 - Chrome 띄우지 않음")
+                    return 0
+                log_line(args.log_file, f"[.] 만료까지 {left:.1f}시간. 갱신을 시작한다")
+        except Exception as e:
+            log_line(args.log_file, f"[!] 저장소 만료 확인 실패({e}). Chrome 을 띄워 직접 확인한다")
 
     proc = None
     if not port_open(args.port):

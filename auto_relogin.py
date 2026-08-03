@@ -143,6 +143,10 @@ def main():
     ap.add_argument("--shot-dir", default="", help="단계별 스크린샷을 남길 디렉터리")
     args = ap.parse_args()
 
+    # 저장소 쪽 세션이 죽어있다고 판명되면 표시해둔다. 프로필 세션이 멀쩡하더라도
+    # 저장소는 다시 맞춰줘야 하기 때문이다(재로그인은 필요 없다).
+    store_dead = False
+
     # 저장소에 기록된 만료를 먼저 본다. 아직 여유가 있으면 Chrome 을 아예 띄우지 않는다.
     # 메모리가 빠듯한 서버(t3.small 등)에서 12시간마다 Chrome 을 띄우는 건 낭비이자 위험이다.
     if args.store and not args.force:
@@ -173,10 +177,12 @@ def main():
                             log_line(args.log_file,
                                      f"[o] 만료까지 {left/24:.1f}일, 세션도 살아있다 - Chrome 띄우지 않음")
                             return 0
+                        store_dead = True
                         log_line(args.log_file,
-                                 f"[!] 만료 전인데 세션이 죽어있다 ({why}). 재발급을 진행한다")
+                                 f"[!] 만료 전인데 저장소 세션이 죽어있다 ({why})")
                     else:
-                        log_line(args.log_file, "[!] 저장소가 비었다. 재발급을 진행한다")
+                        store_dead = True
+                        log_line(args.log_file, "[!] 저장소가 비었다")
                 else:
                     log_line(args.log_file, f"[.] 만료까지 {left:.1f}시간. 갱신을 시작한다")
         except Exception as e:
@@ -197,66 +203,81 @@ def main():
             return 4
 
         cur = session_cookie(bws)
+        need_login = True
         if cur and not args.force:
             left = (cur.get("expires", 0) - time.time()) / 3600
             if left > args.renew_before:
-                log_line(args.log_file,
-                         f"[o] 아직 {left/24:.1f}일 남았다. 갱신 불필요 (--force 로 강제 가능)")
-                # 저장소 메타가 실제 쿠키와 어긋나 있으면 바로잡는다.
-                # 안 그러면 매번 여기까지 와서 Chrome 을 띄우고(메모리 낭비),
-                # 만료 경고도 엉뚱한 시점에 나간다. 스스로 못 고치는 상태가 된다.
-                if args.store and cur.get("expires"):
-                    real = datetime.datetime.fromtimestamp(
-                        cur["expires"], datetime.timezone.utc).isoformat()
-                    try:
-                        from session_keeper import meta_read, meta_write
-                        if meta_read(args.store).get("expires_at") != real:
-                            meta_write(args.store, {"expires_at": real})
-                            log_line(args.log_file, f"[o] 저장소 만료 정보를 실제값으로 바로잡았다")
-                    except Exception as e:
-                        log_line(args.log_file, f"[!] 만료 정보 보정 실패: {e}")
-                return 0
+                if store_dead:
+                    # 프로필 세션은 멀쩡한데 저장소만 망가진 경우.
+                    # 재로그인 없이 지금 쿠키를 저장소에 다시 넣어주면 된다.
+                    # (이걸 안 하면 저장소가 죽은 채 방치돼 스크래퍼만 계속 실패한다)
+                    log_line(args.log_file,
+                             f"[!] 프로필 세션은 유효하다({left/24:.1f}일). "
+                             "재로그인 없이 저장소만 다시 맞춘다")
+                    need_login = False
+                else:
+                    log_line(args.log_file,
+                             f"[o] 아직 {left/24:.1f}일 남았다. 갱신 불필요 (--force 로 강제 가능)")
+                    # 저장소 메타가 실제 쿠키와 어긋나 있으면 바로잡는다.
+                    # 안 그러면 매번 여기까지 와서 Chrome 을 띄우고(메모리 낭비),
+                    # 만료 경고도 엉뚱한 시점에 나간다. 스스로 못 고치는 상태가 된다.
+                    if args.store and cur.get("expires"):
+                        real = datetime.datetime.fromtimestamp(
+                            cur["expires"], datetime.timezone.utc).isoformat()
+                        try:
+                            from session_keeper import meta_read, meta_write
+                            if meta_read(args.store).get("expires_at") != real:
+                                meta_write(args.store, {"expires_at": real})
+                                log_line(args.log_file, "[o] 저장소 만료 정보를 실제값으로 바로잡았다")
+                        except Exception as e:
+                            log_line(args.log_file, f"[!] 만료 정보 보정 실패: {e}")
+                    return 0
 
-        tab = Tab(args.port)
-        tab.send("Page.enable")
-        if cur:
-            drop_session(tab, cur)
+        if not need_login:
+            got = cur     # 저장소만 다시 맞추면 되는 경우. 로그인 흐름을 건너뛴다.
+        else:
+            tab = Tab(args.port)
+            tab.send("Page.enable")
+            if cur:
+                drop_session(tab, cur)
 
-        tab.send("Page.navigate", {"url": args.login_url})
-        time.sleep(6)
-        if args.shot_dir:
-            tab.shot(os.path.join(args.shot_dir, "1_login.png"))
+            tab.send("Page.navigate", {"url": args.login_url})
+            time.sleep(6)
+            if args.shot_dir:
+                tab.shot(os.path.join(args.shot_dir, "1_login.png"))
 
-        # Google 버튼이 처음부터 보이면 그대로, 아니면 '다른 방법으로 로그인' 을 편다.
-        if not tab.click_by_text(IDP_RE):
-            if not tab.click_by_text(MORE_RE):
-                log_line(args.log_file, "[X] '다른 방법으로 로그인' 을 못 찾았다. 페이지 구조가 바뀌었다.")
-                if args.shot_dir:
-                    tab.shot(os.path.join(args.shot_dir, "err_no_more.png"))
-                return 5
-            time.sleep(2.5)
+            # Google 버튼이 처음부터 보이면 그대로, 아니면 '다른 방법으로 로그인' 을 편다.
             if not tab.click_by_text(IDP_RE):
-                log_line(args.log_file, "[X] '구글로 계속하기' 를 못 찾았다. 페이지 구조가 바뀌었다.")
-                if args.shot_dir:
-                    tab.shot(os.path.join(args.shot_dir, "err_no_idp.png"))
-                return 5
+                if not tab.click_by_text(MORE_RE):
+                    log_line(args.log_file,
+                             "[X] '다른 방법으로 로그인' 을 못 찾았다. 페이지 구조가 바뀌었다.")
+                    if args.shot_dir:
+                        tab.shot(os.path.join(args.shot_dir, "err_no_more.png"))
+                    return 5
+                time.sleep(2.5)
+                if not tab.click_by_text(IDP_RE):
+                    log_line(args.log_file,
+                             "[X] '구글로 계속하기' 를 못 찾았다. 페이지 구조가 바뀌었다.")
+                    if args.shot_dir:
+                        tab.shot(os.path.join(args.shot_dir, "err_no_idp.png"))
+                    return 5
 
-        for i in range(12):
-            time.sleep(2.5)
-            if session_cookie(bws):
-                break
-        got = session_cookie(bws)
-        if args.shot_dir:
-            tab.shot(os.path.join(args.shot_dir, "2_after.png"))
+            for _ in range(12):
+                time.sleep(2.5)
+                if session_cookie(bws):
+                    break
+            got = session_cookie(bws)
+            if args.shot_dir:
+                tab.shot(os.path.join(args.shot_dir, "2_after.png"))
 
-        if not got:
-            log_line(args.log_file,
-                     f"[X] 30초 안에 세션이 안 나왔다. URL={tab.js('location.href')} "
-                     "Google 이 재인증을 요구했을 수 있다 - 사람이 확인해야 한다.")
-            return 4
+            if not got:
+                log_line(args.log_file,
+                         f"[X] 30초 안에 세션이 안 나왔다. URL={tab.js('location.href')} "
+                         "Google 이 재인증을 요구했을 수 있다 - 사람이 확인해야 한다.")
+                return 4
 
-        left = (got.get("expires", 0) - time.time()) / 86400
-        log_line(args.log_file, f"[o] 새 세션 발급 완료 ({left:.1f}일짜리)")
+            left = (got.get("expires", 0) - time.time()) / 86400
+            log_line(args.log_file, f"[o] 새 세션 발급 완료 ({left:.1f}일짜리)")
 
         # 쿠키는 Chrome 이 살아있는 동안 꺼내야 한다.
         # 종료 후 별도 프로세스로 다시 띄워 읽으면, 방금 받은 세션이 아직 디스크에

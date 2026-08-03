@@ -130,6 +130,8 @@ def main():
     ap.add_argument("--profile", default=DEFAULT_PROFILE)
     ap.add_argument("--port", type=int, default=9222)
     ap.add_argument("--login-url", default="https://www.valley.town/login")
+    ap.add_argument("--probe-url", default="",
+                    help="세션 생존 확인용 URL. 비우면 session_keeper 기본값을 쓴다")
     ap.add_argument("--force", action="store_true",
                     help="아직 안 죽었어도 새로 발급받는다")
     ap.add_argument("--renew-before", type=float, default=48,
@@ -142,16 +144,31 @@ def main():
     # 메모리가 빠듯한 서버(t3.small 등)에서 12시간마다 Chrome 을 띄우는 건 낭비이자 위험이다.
     if args.store and not args.force:
         try:
-            from session_keeper import meta_read
+            from session_keeper import (DEFAULT_PROBE, is_alive, meta_read,  # noqa: E402
+                                        probe, store_read)
             exp_raw = meta_read(args.store).get("expires_at")
             if exp_raw:
                 left = (datetime.datetime.fromisoformat(exp_raw)
                         - datetime.datetime.now(datetime.timezone.utc)).total_seconds() / 3600
                 if left > args.renew_before:
-                    log_line(args.log_file,
-                             f"[o] 만료까지 {left/24:.1f}일. 갱신 불필요 - Chrome 띄우지 않음")
-                    return 0
-                log_line(args.log_file, f"[.] 만료까지 {left:.1f}시간. 갱신을 시작한다")
+                    # 만료까지 여유가 있어도 실제로 살아있는지 한 번 확인한다.
+                    # 메타만 믿으면, 서버가 세션을 조기 무효화했을 때 영영 못 알아챈다
+                    # (전수 테스트에서 실제로 이 구멍이 드러났다).
+                    # HTTP 요청 한 번이라 Chrome 을 띄우는 것보다 훨씬 싸다.
+                    raw = store_read(args.store)
+                    if raw:
+                        status, headers, _ = probe(args.probe_url or DEFAULT_PROBE, raw)
+                        alive, why = is_alive(status, headers)
+                        if alive:
+                            log_line(args.log_file,
+                                     f"[o] 만료까지 {left/24:.1f}일, 세션도 살아있다 - Chrome 띄우지 않음")
+                            return 0
+                        log_line(args.log_file,
+                                 f"[!] 만료 전인데 세션이 죽어있다 ({why}). 재발급을 진행한다")
+                    else:
+                        log_line(args.log_file, "[!] 저장소가 비었다. 재발급을 진행한다")
+                else:
+                    log_line(args.log_file, f"[.] 만료까지 {left:.1f}시간. 갱신을 시작한다")
         except Exception as e:
             log_line(args.log_file, f"[!] 저장소 만료 확인 실패({e}). Chrome 을 띄워 직접 확인한다")
 
